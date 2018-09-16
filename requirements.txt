@@ -1,0 +1,4 @@
+pyserial >= 3
+matplotlib >= 1.4.3
+numpy >= 1.9.2
+PyQt4 >= 4.11.3
