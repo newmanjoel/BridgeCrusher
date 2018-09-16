@@ -29,7 +29,10 @@ import numpy as np
 import csv
 
 if(float(serial.VERSION) < 3.0):
-    print "You do not have a high enough version of pySerial. You need at least pySerial 3.0"
+    print "You do not have a high enough version of pySerial. You need at least pySerial 3.0, You are currently running version {}".format(serial.VERSION)
+
+    print "try running 'pip install pyserial' or if it says its already installed try 'pip install pyserial --force-reinstall'"
+
     sys.exit(1)
 print 'The version of pySerial that I am using is {}'.format(serial.VERSION)
 
