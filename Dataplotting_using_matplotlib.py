@@ -4,15 +4,25 @@ Created on Tue Feb 07 13:34:09 2017
 
 @author: joell
 """
-import serial
-import serial.tools.list_ports as list_ports
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Button
-import numpy as np
+import subprocess
 import sys
-from PyQt4 import QtGui, QtCore
-import time
-import csv
+try:
+    import serial
+    import serial.tools.list_ports as list_ports
+    import matplotlib.pyplot as plt
+    from matplotlib.widgets import Button
+    import numpy as np
+    from PyQt4 import QtGui, QtCore
+    import time
+    import csv
+except ImportError:
+    subprocess.call(["pip", "install", "-r", "requirements.txt"])
+    sys.exit(1)
+
+if(float(serial.VERSION) < 3.0):
+    print "You do not have a high enough version of pySerial. You need at least pySerial 3.0, You are currently running version {}".format(serial.VERSION)
+    print "try running 'pip install pyserial' or if it says its already installed try 'pip install pyserial --force-reinstall'"
+    sys.exit(1)
 
 
 class commsPopUp(QtGui.QWidget):

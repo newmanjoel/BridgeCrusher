@@ -1,5 +1,5 @@
 # Bridge Crusher
-The Bridge Crusher was created for EGBC (formerly APEGBC) for their popsicle stick bridge crushing event. The machine was developed and created by [Joel Newman](mailto:JoellNewman@Hotmail.com?subject=[GitHub]%20bBridge%20Crusher%20Code), [Abdul Forteia](mailto:afourteia@gmail.com?subject=[GitHub]%20bBridge%20Crusher), and Mat McCann. The Bridge Crusher can handle up to 500kg of applied force before damage to the force sensor. The machine will only display forces up to 300kg.
+The Bridge Crusher was created for EGBC (formerly APEGBC) for their popsicle stick bridge crushing event. The machine was developed and created by [Joel Newman](mailto:JoellNewman@Hotmail.com?subject=[GitHub]%20bBridge%20Crusher), [Abdul Forteia](mailto:afourteia@gmail.com?subject=[GitHub]%20bBridge%20Crusher), and Mat McCann. The Bridge Crusher can handle up to 500kg of applied force before damage to the force sensor. The machine will only display forces up to 300kg.
 
 ![alt text](Media/20170429_105214.jpg "Bridge Crusher")
 
