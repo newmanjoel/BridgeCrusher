@@ -15,7 +15,8 @@ try:
     from PyQt4 import QtGui, QtCore
     import time
     import csv
-except ImportError:
+except ImportError as e:
+    print e
     subprocess.call(["pip", "install", "-r", "requirements.txt"])
     sys.exit(1)
 
@@ -90,14 +91,16 @@ class savePopUp(QtGui.QWidget):
     def __init__(self):
         ''' initialize everything making sure we have this window has maximum priority '''
         global pressure, xdata
+        print "1"
         QtGui.QWidget.__init__(self)
+        print "2"
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("communication device selection")
         self.setWindowModality(QtCore.Qt.ApplicationModal)
+        print "3"
 
         # use the built in savefile name thing
         fileName = QtGui.QFileDialog.getSaveFileName(self, "Save the File", "", 'CSV (*.csv);;All Files (*)')
-
         # if the user decides not to save then do nothing
         if fileName == "":
             return
@@ -178,7 +181,7 @@ class callbacks:
             savePopUp()
         elif event.key == ' ':
             # print ' I should be stopping because space was hit'
-            self.stop()
+            self.stop(event)
 
     @staticmethod
     def leave_everything(event):
@@ -267,7 +270,8 @@ def update():
                 pass
             else:
                 # if we receive a non-standard message, print it out
-                print 'ARDUINO -> '.format(arduinoString)
+                if arduinoString != " ":
+                    print 'ARDUINO -> '.format(arduinoString)
 
 
 def getArduinoComms():
@@ -280,9 +284,10 @@ def getArduinoComms():
 if __name__ == "__main__":
     arduinoData = None
     getArduinoComms()
-
+    qApp = QtGui.QApplication(sys.argv)
     fig, ax = plt.subplots()
-    plt.subplots_adjust(bottom=0.2)
+    plt.subplots_adjust(bottom=0.2, top=0.7)
+    plt.ioff()
     eventNumber = 0
 
     fig.canvas.set_window_title('This is the test window title')
