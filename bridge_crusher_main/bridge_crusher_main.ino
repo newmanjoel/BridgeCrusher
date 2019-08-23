@@ -705,14 +705,9 @@ void userInterface_diagnostics(void) {
 
 }// end of userInterface_diagnostics()
 
-<<<<<<< Updated upstream
 
-void changeScreen(int _whichScreen) {
-  if (_usbDebug) {
-=======
 void changeScreen(int whichScreen) {
   if (usbDebug) {
->>>>>>> Stashed changes
     Serial.print("Chaning the screen from  ");
     Serial.print(_currentScreen);
     Serial.print("->");
