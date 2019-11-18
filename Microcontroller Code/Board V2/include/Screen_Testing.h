@@ -5,6 +5,8 @@
 #include "LiquidCrystal_PCF8574.h"
 #include "Filter.h"
 #include "ADS1246.cpp"
+#include "HydraulicMotor.h"
+#include "UserInterface.h"
 
 // Testing Screen
 

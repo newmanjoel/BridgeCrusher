@@ -1,70 +1,22 @@
-#include "Arduino.h"
 #include "HydraulicMotor.h"
-#include <avdweb_AnalogReadFast.h>
 // ----- Constructors -----
-HydraulicMotor::HydraulicMotor(){
-
-}
-HydraulicMotor::HydraulicMotor(int pwmPin, int csPin, int dirPin, int slpPin){
-_currentPin = csPin;
-_sleepPin = slpPin;
-_directionPin = dirPin;
-_pwmPin = pwmPin;
-dcMotor = new DimmerZero(pwmPin, false);
+HydraulicMotor::HydraulicMotor(){};
+HydraulicMotor::HydraulicMotor(int i_pwmPin, int i_csPin, int i_dirPin, int i_slpPin, StopStartCondition& i_safety)
+{
+  setup(i_pwmPin, i_csPin, i_dirPin, i_slpPin, i_safety);
 }
 
 // ----- Begin methods -----
-void HydraulicMotor::begin(){
-  _currentGain = 0.01; // 10mV/A
-  _currentOffset = 0.05; // offset of 50mV
-
-// setup the motor pwm pin with values to get to 40kHz
-_maxMotorValue = 300;
-frequency = 10000;
-dcMotor->setMaxValue(_maxMotorValue); // Set to 300
-dcMotor->setFrequency(frequency); // Set to 10000
-dcMotor->init();
-analogReadResolution(10);
-digitalWrite(_sleepPin, HIGH); // pull low to put into sleep mode
-
-}
-void HydraulicMotor::begin(int pwmPin, int csPin, int dirPin, int slpPin){
-  _currentPin = csPin;
-  _sleepPin = slpPin;
-  _directionPin = dirPin;
-  _pwmPin = pwmPin;
-  begin();
+void HydraulicMotor::setup(int i_pwmPin, int i_csPin, int i_dirPin, int i_slpPin, StopStartCondition& i_safety ){
+  motor = new DCMotor(i_pwmPin,i_csPin,i_dirPin,i_slpPin);
+  safety = &i_safety;
+  controlSystem = new PID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+  controlSystem->SetOutputLimits(-1,1);
+  controlSystem->SetMode(AUTOMATIC);
 }
 
-
-void HydraulicMotor::setSpeed(double inputSpeed){
-// the inputspeed is from -1 -> 0 -> 1
-// negative 1 is full speed reverse
-// zero is off
-// positive 1 is full speed forward
-dcMotor->setValue(dutyCycle(inputSpeed));
-setDirection(inputSpeed);
-
-}
-double HydraulicMotor::getCurrent(){
-  lastCurrent = map(analogReadFast(_currentPin),0,1023, 0, 1023); // 23us on SAMD21
-  return lastCurrent;
+void HydraulicMotor::update(){
+  controlSystem->Compute();
+  motor->setSpeed(Output);
 }
 
-void HydraulicMotor::setDirection(double inputPercent){
-  digitalWrite(_directionPin, (inputPercent>=0));
-}
-
-int HydraulicMotor::dutyCycle(double inputPercent){
-speed = (int)(abs(inputPercent)*_maxMotorValue);
-return speed;
-}
-
-double HydraulicMotor::mapping(double x) {
-  return _currentGain * (x-_currentOffset);
-}
-
-// Utility functions
-double HydraulicMotor::map(double x, double in_min, double in_max, double out_min, double out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}

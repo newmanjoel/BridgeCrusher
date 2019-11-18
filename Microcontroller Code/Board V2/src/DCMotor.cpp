@@ -12,6 +12,7 @@ DCMotor::DCMotor(int i_pwmPin, int i_csPin, int i_dirPin, int i_slpPin)
     directionPin = i_dirPin;
     pwmPin = i_pwmPin;
     motorInterface = new DimmerZero(pwmPin, false);
+    setup();
 }
 // ----- Begin methods -----
 void DCMotor::setup(){

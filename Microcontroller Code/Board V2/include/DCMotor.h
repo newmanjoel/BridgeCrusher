@@ -5,9 +5,10 @@ class DCMotor
 {
     public:
         volatile int speed;
-        int frequency;
+        volatile int frequency;
         DimmerZero* motorInterface;
         volatile double lastCurrent;
+        volatile int maxMotorValue;
 
         // ----- Constructor -----
         DCMotor(int pwmPin, int csPin, int dirPin, int slpPin);
@@ -30,7 +31,6 @@ class DCMotor
 
   private:
     volatile int currentPin, sleepPin, pwmPin, directionPin;
-    volatile int maxMotorValue;
     volatile double currentGain, currentOffset;
 
 

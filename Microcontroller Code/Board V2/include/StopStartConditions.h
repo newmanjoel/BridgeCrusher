@@ -1,25 +1,28 @@
 #ifndef StopStartCondition_h
 #define StopStartCondition_h
+#include "UserInterface.h"
 
 class StopStartCondition {
     // Note this should probably be a singleton but because its just me then I feel like I can get away with stuff like this.
 
   public:
     // define all of the variables
-    volatile bool Stop;
-    volatile bool Start;
-    volatile bool Max ;
-    volatile bool Min;
-    volatile bool Lid;
+    Switch Stop;
+    Switch Start;
+    Switch Max ;
+    Switch Min;
+    Switch Lid;
 
-    volatile bool StopDown;
-    volatile bool StopUp;
-    volatile bool StartUp;
-    volatile bool StartDown;
+    bool StopDown;
+    bool StopUp;
+    bool StartUp;
+    bool StartDown;
 
   public:
     // define all of the functions
-    StopStartCondition();
+    
+    StopStartCondition(Switch* i_stop, Switch* i_start, Switch* i_max,
+      Switch* i_min, Switch* i_lid);
     void stop_logic();
 
    

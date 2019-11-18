@@ -19,12 +19,13 @@
 #include <Wire.h>
 
 #include "Screen_Testing.h"
+#include "UserInterface.h"
 
 void setup();
 void loop();
 
 void stop_logic();
-
+// TODO: move all of these to their own files
 void unloaded_enter();
 void unloaded_loop();
 void unloaded_exit();
@@ -50,12 +51,24 @@ void polling_loop();
 void polling_exit();
 
 
-HydraulicMotor dcmotor(Mtr_PWM, Mtr_CS, Mtr_DIR, Mtr_SLP);
+
+Switch encoderSw(Enc_SW_NO, String("Encoder Switch"));
+Switch startSw(Start_NO, String("Start Button"));
+Switch stopSw(Stop_NC, String("Stop Button"));
+Switch lidSw(Lid_NC, String("Lid Limit Switch"));
+Switch pistonMax(Max_NC, String("Piston Max Extension"));
+Switch pistonMin(Min_NC, String("Piston Min Extension"));
+
+Switch* allSwitches[] = {&encoderSw,&startSw, &stopSw, &lidSw, &pistonMax, &pistonMin};
+
+StopStartCondition safety(&stopSw,&startSw,&pistonMax,&pistonMin,&lidSw);
+HydraulicMotor jack;
 RotaryEncoderJoel encoder(Enc_A, Enc_B, Enc_SW_NO);
 ADS1246 sensor;
-StopStartCondition safety;
-
 LiquidCrystal_PCF8574 lcd(0x27);
+
+Userinterface UI(6, allSwitches, &lcd, &encoder);
+
 Filter lpf;
 Filter lpf_stage2;
 
@@ -84,17 +97,6 @@ Fsm screen(&testing_screen);
 Fsm motor(&testing);
 Fsm polling(&polling_state);
 
-/*
-volatile boolean Start;
-volatile boolean Stop;
-volatile boolean Lid;
-volatile boolean Max;
-volatile boolean Min;
-volatile boolean StopDown;
-volatile boolean StopUp;
-volatile boolean StartDown;
-volatile boolean StartUp;
-*/
 volatile boolean StartAdc;
 volatile boolean EncoderClick;
 volatile long EncoderValue;
@@ -108,30 +110,21 @@ int displayRefreshRate = 1000 / 3; // this is in ms. 3Hz
 void setup() {
   // Start comms on usb
   Serial.begin(115200);
-  lcd.begin(20, 4);
-  lcd.home();
-  lcd.clear();
-  lcd.noBlink();
-  lcd.noCursor();
-  lcd.setBacklight(255);
-  // Print a message to the LCD.
-  lcd.setCursor(0, 0);
-  lcd.print("ADC:");
-  lcd.setCursor(0, 1);
-  lcd.print("ENC:");
 
-  // initialize volatile variables
-  /*Start = false;
-  Stop = false;
-  Lid = false;
-  Max = false;
-  Min = false;
-  StopDown = false;
-  StopUp = false;
-  StartDown = false;
-  StartUp = false;
-  StartAdc = false;
-  */
+  UI.lcd->begin(20, 4);
+  UI.lcd->home();
+  UI.lcd->clear();
+  UI.lcd->noBlink();
+  UI.lcd->noCursor();
+  UI.lcd->setBacklight(255);
+  // Print a message to the LCD.
+  UI.lcd->setCursor(0, 0);
+  UI.lcd->print("SET:");
+  UI.lcd->setCursor(0, 1);
+  UI.lcd->print(" IN:");
+  UI.lcd->setCursor(0, 2);
+  UI.lcd->print("OUT:");
+
   EncoderClick = false;
   EncoderValue = 0;
 
@@ -165,7 +158,7 @@ void setup() {
   attachInterrupt(Stop_NC, stop_ISR, CHANGE);
   attachInterrupt(Start_NO, start_ISR, CHANGE);
   attachInterrupt(Mtr_PWM, motor_ISR, FALLING);
-  analogReadResolution(12);
+  //analogReadResolution(12);
 
 
   // setup the filters
@@ -176,16 +169,14 @@ void setup() {
   lpf_stage2.begin(0.18261049892987757, -0.18757390839139598, 0.1826104989298776, 1.4034582124101722, -0.5117751386002309);
   lpf.begin(0.25, -0.44774427666635713, 0.25000000000000006, 1.7542884087063622, -0.8399913314609916, &lpf_stage2);
 
+  jack.setup(Mtr_PWM, Mtr_CS, Mtr_DIR, Mtr_SLP, safety);
 
   sensor.begin(Adc_CS, Adc_STR, Adc_RST);
   SPI.begin();
   sensor.setupADC();
 
-  dcmotor.begin();
-  dcmotor.setSpeed(0.6);
-
   screen.add_timed_transition(&testing_screen, &testing_screen, displayRefreshRate, NULL);
-
+  motor.add_timed_transition(&testing, &testing, 10, NULL); // update at 100Hz
 
   delay(1000);
   double offsetTemp = 0;
@@ -232,19 +223,20 @@ bool readMotorSleep() {
   return true;
 }
 double readMotorSpeed() {
-  return dcmotor.speed;
+  return jack.motor->getCurrent();
 }
 bool readMotorDirection() {
   return true;
 }
 double readMotorCurrent() {
-  return dcmotor.lastCurrent;
+  return jack.motor->lastCurrent;
 }
 
 
 void polling_enter(){}
 void polling_exit(){}
 void polling_loop(){
+  UI.poll();
   if ((millis() - debugTime) > 1000 || sensor.newData) {
     debugTime = millis();
     StaticJsonDocument<300> doc;
@@ -297,7 +289,7 @@ void polling_loop(){
 
     //serializeJson(doc, Serial);
     //Serial.println();
-    Serial.println(lpf.output*sensor.sensitivity,10);
+    //Serial.println(lpf.output*sensor.sensitivity,10);
   }
 }
 
@@ -314,10 +306,11 @@ void unloaded_exit() {
 }
 // testing
 void testing_enter() {
-
+  jack.update();
 }
 void testing_loop() {
   // this is used for testing the motor
+  
   
 
 }

@@ -2,7 +2,7 @@
 
 
 extern RotaryEncoderJoel encoder;
-extern HydraulicMotor dcmotor;
+extern HydraulicMotor jack;
 extern ADS1246 sensor;
 extern StopStartCondition safety;
 
@@ -35,7 +35,7 @@ void adc_ISR() {
   sensor.setSensorReady();
 }
 void motor_ISR() {
-  dcmotor.lastCurrent = dcmotor.getCurrent();
+  jack.motor->getCurrent();
 }
 
 

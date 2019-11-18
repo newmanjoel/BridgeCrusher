@@ -1,49 +1,36 @@
 #ifndef HydraulicMotor_H
 #define HydraulicMotor_H
-#include <DimmerZero.h>
+#include "DCMotor.h"
+#include "PID_v1.h"
+#include "StopStartConditions.h"
+
 class HydraulicMotor
 {
   public:
-    // ----- variables -----
-    volatile int speed;
-    int frequency;
-    DimmerZero* dcMotor;
-    volatile double lastCurrent;
-
+    // ------ variables ------
+    // PID Variables
+    double Setpoint, Input, Output;
+    // Default PID Values
+    double Kp=1, Ki=1, Kd=0;
+    // ----- object ----- (has a relationships)
+    DCMotor* motor;
+    StopStartCondition* safety;
+    PID* controlSystem;
+    
 
     // ----- Constructor -----
-    HydraulicMotor(int pwmPin, int csPin, int dirPin, int slpPin);
     HydraulicMotor();
+    HydraulicMotor(int i_pwmPin, int i_csPin, int i_dirPin, int i_slpPin, StopStartCondition& i_safety );
 
     // starting points
-    void begin(int pwmPin, int csPin, int dirPin, int slpPin);
-    void begin();
+    void setup(int i_pwmPin, int i_csPin, int i_dirPin, int i_slpPin, StopStartCondition& i_safety );
 
-    // set the speed of the motor
-    void setSpeed(double inputSpeed);
+    // primary looping point
+    void update();
 
-    // get the current from the motor
-    double getCurrent();
-
-    // set the direction of the motor
-    void setDirection(double inputPercent);
-
-    double map(double x, double in_min, double in_max, double out_min, double out_max);
-
+    
   private:
-    volatile int _currentPin, _sleepPin, _pwmPin, _directionPin;
-    volatile int _maxMotorValue;
-    volatile double _currentGain, _currentOffset;
-
-
-    volatile int8_t _oldState;
-    volatile long _position;         // Internal position (4 times _positionExt)
-    volatile long _positionExt;      // External position
-    volatile long _positionExtPrev;  // External position (used only for direction checking)
-
-    // calculate the duty cycle required
-    int dutyCycle(double inputPercent);
-    double mapping(double x);
+    
 };
 
 #endif
