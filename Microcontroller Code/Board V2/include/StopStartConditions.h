@@ -7,11 +7,11 @@ class StopStartCondition {
 
   public:
     // define all of the variables
-    Switch Stop;
-    Switch Start;
-    Switch Max ;
-    Switch Min;
-    Switch Lid;
+    Switch* Stop;
+    Switch* Start;
+    Switch* Max;
+    Switch* Min;
+    Switch* Lid;
 
     bool StopDown;
     bool StopUp;
@@ -21,7 +21,7 @@ class StopStartCondition {
   public:
     // define all of the functions
     
-    StopStartCondition(Switch* i_stop, Switch* i_start, Switch* i_max,
+    StopStartCondition(Switch *i_stop, Switch *i_start, Switch *i_max,
       Switch* i_min, Switch* i_lid);
     void stop_logic();
 

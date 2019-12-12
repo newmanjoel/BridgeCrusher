@@ -52,12 +52,12 @@ void polling_exit();
 
 
 
-Switch encoderSw(Enc_SW_NO, String("Encoder Switch"));
-Switch startSw(Start_NO, String("Start Button"));
-Switch stopSw(Stop_NC, String("Stop Button"));
-Switch lidSw(Lid_NC, String("Lid Limit Switch"));
-Switch pistonMax(Max_NC, String("Piston Max Extension"));
-Switch pistonMin(Min_NC, String("Piston Min Extension"));
+NO_Switch encoderSw(Enc_SW_NO, String("Encoder Switch"));
+NO_Switch startSw(Start_NO, String("Start Button"));
+NC_Switch stopSw(Stop_NC, String("Stop Button"));
+NC_Switch lidSw(Lid_NC, String("Lid Limit Switch"));
+NC_Switch pistonMax(Max_NC, String("Piston Max Extension"));
+NC_Switch pistonMin(Min_NC, String("Piston Min Extension"));
 
 Switch* allSwitches[] = {&encoderSw,&startSw, &stopSw, &lidSw, &pistonMax, &pistonMin};
 

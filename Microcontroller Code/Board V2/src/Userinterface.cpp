@@ -1,28 +1,53 @@
 #include "UserInterface.h"
 
+NO_Switch::NO_Switch(int i_pin, const String i_name)
+{pin=i_pin; name=i_name;}
+NC_Switch::NC_Switch(int i_pin, const String i_name)
+{pin=i_pin; name=i_name;}
 
-Switch::Switch(){
+void NO_Switch::poll()
+{
+    NO = digitalRead(pin)==invert ? false:true;
+    NC = !NO;
+}
+
+void NC_Switch::poll()
+{
+    NC = digitalRead(pin)==invert ? false:true;
+    NO = !NC;
+}
+void Switch::poll()
+{
+    NC = digitalRead(pin)==invert ? false:true;
+    NO = !NC;
+}
+
+Switch::Switch()
+{
     pin = -1;
     invert = false;
     NO = false;
     NC = false;
 }
 
-Switch::Switch(int i_pin){
+Switch::Switch(int i_pin)
+{
     pin = i_pin;
     invert = false;
     NO = false;
     NC = false;
 }
 
-Switch::Switch(int i_pin, bool i_invert){
+Switch::Switch(int i_pin, bool i_invert)
+{
     pin = i_pin;
     invert = i_invert;
     NO = false;
     NC = false;
 }
 
-Switch::Switch(int i_pin, const String i_name){
+Switch::Switch(int i_pin, const String i_name)
+{
     pin = i_pin;
     invert = false;
     NO = false;
@@ -30,21 +55,14 @@ Switch::Switch(int i_pin, const String i_name){
     name = i_name;
     
 }
-Switch::Switch(int i_pin, const String i_name, bool i_invert){
+Switch::Switch(int i_pin, const String i_name, bool i_invert)
+{
     pin = i_pin;
     invert = i_invert;
     NO = false;
     NC = false;
     name = i_name;
     
-}
-void Switch::poll(){
-    NO = digitalRead(pin)==invert ? false:true;
-    NC = !NO;
-    //Serial.print(name);
-    //Serial.print(":");
-    //Serial.print(NO);
-    //Serial.print("|");
 }
 
 Userinterface::Userinterface(int i_switchNum, Switch *i_switches[], LiquidCrystal_PCF8574* i_lcd, RotaryEncoderJoel* i_encoder)

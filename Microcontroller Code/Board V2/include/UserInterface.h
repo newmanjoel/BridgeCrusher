@@ -19,8 +19,22 @@ class Switch
         Switch(int i_pin, const String i_name);
         Switch(int i_pin, const String i_name, bool i_invert);
 
+    public:
         void poll();
 
+};
+
+class NO_Switch : public Switch
+{
+    public:
+        NO_Switch(int i_pin, const String i_name);
+        void poll();
+};
+class NC_Switch : public Switch
+{
+    public:
+        NC_Switch(int i_pin, const String i_name);
+        void poll();
 };
 
 class Userinterface
