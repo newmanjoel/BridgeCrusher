@@ -1,0 +1,89 @@
+{
+    "configurations": [
+        {
+            "name": "!!! WARNING !!! AUTO-GENERATED FILE, PLEASE DO NOT MODIFY IT AND USE https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/include",
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/src",
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/ArduinoJson/src",
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/arduino-fsm",
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/Dimmer_class_for_SAMD21/src",
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/avdweb_AnalogReadFast",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/SPI",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/Adafruit_ZeroDMA",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/Adafruit_ZeroDMA/utility",
+                "/home/joel/.platformio/lib/PID_ID2",
+                "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/LiquidCrystal_PCF8574/src",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/Wire",
+                "/home/joel/.platformio/packages/framework-arduinosam/cores/adafruit",
+                "/home/joel/.platformio/packages/framework-arduinosam/system/samd/CMSIS/CMSIS/Include",
+                "/home/joel/.platformio/packages/framework-arduinosam/system/samd/CMSIS-Atmel/CMSIS/Device/ATMEL",
+                "/home/joel/.platformio/packages/framework-arduinosam/cores/adafruit/Adafruit_TinyUSB_Core",
+                "/home/joel/.platformio/packages/framework-arduinosam/cores/adafruit/Adafruit_TinyUSB_Core/tinyusb/src",
+                "/home/joel/.platformio/packages/framework-arduinosam/variants/itsybitsy_m0",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/HID",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/I2S/src",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/SAMD_AnalogCorrection/src",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/SDU/src",
+                "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/USBHost/src",
+                "/home/joel/.platformio/packages/tool-unity",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/include",
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/src",
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/ArduinoJson/src",
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/arduino-fsm",
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/Dimmer_class_for_SAMD21/src",
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/avdweb_AnalogReadFast",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/SPI",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/Adafruit_ZeroDMA",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/Adafruit_ZeroDMA/utility",
+                    "/home/joel/.platformio/lib/PID_ID2",
+                    "/home/joel/Github/BridgeCrusher/Microcontroller Code/Board V2/lib/LiquidCrystal_PCF8574/src",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/Wire",
+                    "/home/joel/.platformio/packages/framework-arduinosam/cores/adafruit",
+                    "/home/joel/.platformio/packages/framework-arduinosam/system/samd/CMSIS/CMSIS/Include",
+                    "/home/joel/.platformio/packages/framework-arduinosam/system/samd/CMSIS-Atmel/CMSIS/Device/ATMEL",
+                    "/home/joel/.platformio/packages/framework-arduinosam/cores/adafruit/Adafruit_TinyUSB_Core",
+                    "/home/joel/.platformio/packages/framework-arduinosam/cores/adafruit/Adafruit_TinyUSB_Core/tinyusb/src",
+                    "/home/joel/.platformio/packages/framework-arduinosam/variants/itsybitsy_m0",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/HID",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/I2S/src",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/SAMD_AnalogCorrection/src",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/SDU/src",
+                    "/home/joel/.platformio/packages/framework-arduinosam/libraries/__cores__/adafruit/USBHost/src",
+                    "/home/joel/.platformio/packages/tool-unity",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=40100",
+                "ARDUINO_ARCH_SAMD",
+                "ARDUINO_ITSYBITSY_M0",
+                "ADAFRUIT_ITSYBITSY_M0",
+                "CRYSTALLESS",
+                "ARM_MATH_CM0PLUS",
+                "__SAMD21G18A__",
+                "F_CPU=48000000L",
+                "USBCON",
+                "ARDUINO=10805",
+                "USB_VID=0x239A",
+                "USB_PID=0x800F",
+                "USB_PRODUCT=\"ItsyBitsy M0 Express\"",
+                "USB_MANUFACTURER=\"Adafruit\"",
+                ""
+            ],
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "\"/home/joel/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc\" -mthumb -mcpu=cortex-m0plus"
+        }
+    ],
+    "version": 4
+}
