@@ -20,6 +20,7 @@
 
 #include "Screen_Testing.h"
 #include "UserInterface.h"
+#include "Settings.h"
 
 void setup();
 void loop();
@@ -60,6 +61,10 @@ NC_Switch pistonMax(Max_NC, String("Piston Max Extension"));
 NC_Switch pistonMin(Min_NC, String("Piston Min Extension"));
 
 Switch* allSwitches[] = {&encoderSw,&startSw, &stopSw, &lidSw, &pistonMax, &pistonMin};
+
+
+NumberSetting 
+
 
 StopStartCondition safety(&stopSw,&startSw,&pistonMax,&pistonMin,&lidSw);
 HydraulicMotor jack;
