@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(name)s - %(le
 if __name__ == '__main__':
     try:
         hmi = Hmi()
-        hmi.port = 'COM5'
+        hmi.port = 'COM8'
         hmi.history_length = 5000
         #t1 = threading.Thread(target=run_webserver.start_data_collection)
         t2 = threading.Thread(target=server.start_web_server)

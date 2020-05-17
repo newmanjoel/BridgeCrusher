@@ -1,14 +1,19 @@
 #ifndef DCMotor_H
 #define DCMotor_H
 #include <DimmerZero.h>
+
 class DCMotor
 {
     public:
         volatile int speed;
         volatile int frequency;
-        DimmerZero* motorInterface;
+        DimmerZero* motorInterfaceA;
+        DimmerZero* motorInterfaceB;
         volatile double lastCurrent;
         volatile int maxMotorValue;
+        volatile bool direction;
+        volatile bool sleep;
+        volatile double desiredSpeed;
 
         // ----- Constructor -----
         DCMotor(int pwmPin, int csPin, int dirPin, int slpPin);
@@ -21,11 +26,7 @@ class DCMotor
         // set the speed of the motor
         void setSpeed(double inputSpeed);
 
-        // get the current from the motor
-        double getCurrent();
-
-        // set the direction of the motor
-        void setDirection(double inputPercent);
+        void setDirection(bool forward);
 
         double map(double x, double in_min, double in_max, double out_min, double out_max);
 
@@ -36,7 +37,7 @@ class DCMotor
 
     // calculate the duty cycle required
     int dutyCycle(double inputPercent);
-    double mapping(double x);
+    double current_mapping(double x);
 };
 
 

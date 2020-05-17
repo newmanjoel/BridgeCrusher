@@ -15,6 +15,8 @@ HISTORY:
 #ifndef analogReadFast_H
 #define analogReadFast_H
 
+#include "Arduino.h"
+
 int inline analogReadFast(byte ADCpin);
 
 #if defined(__arm__) 

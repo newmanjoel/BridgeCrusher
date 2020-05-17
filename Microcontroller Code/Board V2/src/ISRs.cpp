@@ -40,7 +40,7 @@ void adc_ISR() {
   sensor.setSensorReady();
 }
 void motor_ISR() {
-  jack.motor->getCurrent();
+  //jack.motor->lastCurrent;
 }
 
 

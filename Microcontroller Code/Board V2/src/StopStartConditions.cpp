@@ -2,7 +2,6 @@
 
 StopStartCondition::StopStartCondition(Switch *i_stop, Switch *i_start, Switch *i_max, Switch *i_min, Switch *i_lid): Stop(i_stop), Start(i_start), Max(i_max), Min(i_min), Lid(i_lid)
 {
-
     StopDown = true;
     StopUp = true;
     StartUp = true;
@@ -11,6 +10,12 @@ StopStartCondition::StopStartCondition(Switch *i_stop, Switch *i_start, Switch *
 
 void StopStartCondition::stop_logic() 
 {
+  last_StartDown = StartDown;
+  last_StartUp = StartUp;
+  last_StopDown = StopDown;
+  last_StopUp = StopUp;
+
+
   StopDown = Stop->NC && Lid->NC && Max->NC;
   StopUp = Stop->NC && Lid->NC && Min->NC;
   StartUp = Start->NO && !StopUp;

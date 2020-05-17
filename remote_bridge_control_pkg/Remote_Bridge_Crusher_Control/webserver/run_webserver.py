@@ -5,6 +5,7 @@ import logging
 import math
 import time
 import datetime
+import numpy as np
 
 import dash
 import dash_core_components as dcc
@@ -51,7 +52,8 @@ app.layout = html.Div([
                 html.Button('Pause Data', id='pause-button'),
             
                 dcc.Graph(
-                    id='live-update-graph'
+                    id='live-update-graph',
+                    data={'x':np.zeros(100), 'y':np.zeros(100)}
                 ),
                 daq.Gauge(
                     id='current-weight',

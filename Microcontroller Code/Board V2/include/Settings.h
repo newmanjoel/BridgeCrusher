@@ -1,26 +1,27 @@
 #ifndef Settings_H
 #define Settings_H
 #include "Wire.h"
-class SettableSetting
-{
-    virtual void json(String inputString);
-};
-class StringSetting : public SettableSetting
-{
-    public:
-        String jsonName;
-        String DefaultValue;
-        String Value;
-        void json(String inputString);
 
-};
-class NumberSetting : public SettableSetting
+class NumberSetting
 {
     public:
-        String jsonName;
+        
+        NumberSetting();
         double DefaultValue;
-        double Value;
+        double* value; // pointer to the actual value
+        double min; // minimum alowable value
+        double max; // maximum alowable value
+        double stepValue; // when incrementing, the step value
+
+        String longDescription; // long form description
+        String jsonName; // single word name
+        int type;
+
         void json(String inputString);
+        void setValue(double newValue);
+        void increment();
+        void decrement();
+        void begin();
 
 };
 

@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: Remote-Bridge-Crusher-Control
+Version: 0.1
+Summary: A web interface for EGBC Victoria Bridge Crusher
+Home-page: https://github.com/newmanjoel/BridgeCrusher/tree/pip-testing/remote_bridge_control_pkg
+Author: Joel Newman
+Author-email: JoellNewman@hotmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Windows
+Description-Content-Type: text/markdown

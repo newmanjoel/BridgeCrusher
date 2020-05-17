@@ -28,6 +28,7 @@ class ADS1246 {
     double sensitivity = 0; // v/kg (5/(500*2))
     double gain = 1;
     double offset = 0;
+    double corrected_gain = 1;
 
 
 
@@ -289,7 +290,7 @@ class ADS1246 {
 
     double getConvertedOutput() {
       double temp = readADC();
-      return  (temp+offset)* sensitivity;
+      return  (temp+offset)* sensitivity*corrected_gain;
     }
 
     signed long ConvertTwosComplementByteToInteger(unsigned long rawValue) {

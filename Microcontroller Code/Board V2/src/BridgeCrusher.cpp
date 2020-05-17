@@ -1,7 +1,5 @@
 #include "BridgeCrusherPins.h"
 #include "StopStartConditions.h"
-//#include <Arduino.h>
-//#include <Encoder.h>
 #include "RotaryEncoderJoel.h"
 #include "ADS1246.cpp"
 #include <ArduinoJson.h>
@@ -18,9 +16,13 @@
 #include <LiquidCrystal_PCF8574.h>
 #include <Wire.h>
 
-#include "Screen_Testing.h"
+#include "Screen_Run.h"
 #include "UserInterface.h"
 #include "Settings.h"
+#include "SettingsScreen.h"
+#include "Motor_Testing.h"
+#include "Settings.h"
+
 
 void setup();
 void loop();
@@ -31,9 +33,9 @@ void unloaded_enter();
 void unloaded_loop();
 void unloaded_exit();
 
-void testing_enter();
-void testing_loop();
-void testing_exit();
+void motoring_enter();
+void motoring_loop();
+void motoring_exit();
 
 void homing_enter();
 void homing_loop();
@@ -62,8 +64,23 @@ NC_Switch pistonMin(Min_NC, String("Piston Min Extension"));
 
 Switch* allSwitches[] = {&encoderSw,&startSw, &stopSw, &lidSw, &pistonMax, &pistonMin};
 
+NumberSetting pid_kp;
+NumberSetting pid_ki;
+NumberSetting pid_kd;
+NumberSetting pid_setpoint;
+NumberSetting weight_offset;
+NumberSetting weight_gain;
+NumberSetting weight_units;
 
-NumberSetting 
+NumberSetting *total_settings[]={
+    &pid_setpoint,
+    &pid_kp,
+    &pid_ki,
+    &pid_kd,
+    &weight_offset,
+    &weight_gain,
+    &weight_units
+};
 
 
 StopStartCondition safety(&stopSw,&startSw,&pistonMax,&pistonMin,&lidSw);
@@ -73,6 +90,7 @@ ADS1246 sensor;
 LiquidCrystal_PCF8574 lcd(0x27);
 
 Userinterface UI(6, allSwitches, &lcd, &encoder);
+
 
 Filter lpf;
 Filter lpf_stage2;
@@ -90,26 +108,35 @@ Filter lpf_stage2;
    calibrating (unknown)
 */
 State unloaded(&unloaded_enter, &unloaded_loop, &unloaded_exit);
-State testing(&testing_enter, &testing_loop, &testing_exit);
+State motoring(&motoring_enter, &motoring_loop, &motoring_exit);
 State homing(&homing_enter, &homing_loop, &homing_exit);
 State calibrating(&calibrating_enter, &calibrating_loop, &calibrating_exit);
-State testing_screen(&testing_screen_enter, &testing_screen_loop, &testing_screen_exit);
 State polling_state(&polling_enter, &polling_loop, &polling_exit);
 
+State run_screen(&run_screen_enter, &run_screen_loop, &run_screen_exit);
+State settings_screen(&singleSetting_entry,&singleSetting_loop, &singleSetting_exit);
+State motor_testing_screen(&motor_testing_screen_enter, &motor_testing_screen_loop, &motor_testing_screen_exit);
 
-Fsm fsm(&unloaded);
-Fsm screen(&testing_screen);
-Fsm motor(&testing);
+
+//Fsm fsm(&unloaded);
+Fsm screen(&run_screen);
+Fsm motor(&motoring);
 Fsm polling(&polling_state);
 
 volatile boolean StartAdc;
 volatile boolean EncoderClick;
 volatile long EncoderValue;
+volatile double maxWeight;
+volatile double nowWeight;
 
 unsigned long time;
 unsigned long debugTime;
+
 double offset = 0;
 int displayRefreshRate = 1000 / 3; // this is in ms. 3Hz
+
+int RUN_SCREEN = 1;
+int SETTINGS_SCREEN = 2;
 
 
 void setup() {
@@ -122,13 +149,7 @@ void setup() {
   UI.lcd->noBlink();
   UI.lcd->noCursor();
   UI.lcd->setBacklight(255);
-  // Print a message to the LCD.
-  UI.lcd->setCursor(0, 0);
-  UI.lcd->print("SET:");
-  UI.lcd->setCursor(0, 1);
-  UI.lcd->print(" IN:");
-  UI.lcd->setCursor(0, 2);
-  UI.lcd->print("OUT:");
+ 
 
   EncoderClick = false;
   EncoderValue = 0;
@@ -162,8 +183,9 @@ void setup() {
   attachInterrupt(Min_NC, min_ISR, CHANGE);
   attachInterrupt(Stop_NC, stop_ISR, CHANGE);
   attachInterrupt(Start_NO, start_ISR, CHANGE);
-  attachInterrupt(Mtr_PWM, motor_ISR, FALLING);
-  //analogReadResolution(12);
+  attachInterrupt(Mtr_PWM, motor_ISR, RISING);
+  //analogReadResolution(10);
+  analogReadResolution(12);
 
 
   // setup the filters
@@ -180,8 +202,13 @@ void setup() {
   SPI.begin();
   sensor.setupADC();
 
-  screen.add_timed_transition(&testing_screen, &testing_screen, displayRefreshRate, NULL);
-  motor.add_timed_transition(&testing, &testing, 10, NULL); // update at 100Hz
+  screen.add_timed_transition(&run_screen, &run_screen, displayRefreshRate, NULL);
+  screen.add_timed_transition(&settings_screen, &settings_screen, displayRefreshRate, NULL);
+  //screen.add_timed_transition(&motor_testing_screen, &motor_testing_screen, displayRefreshRate, NULL);
+
+  motor.add_timed_transition(&motoring, &motoring, 10, NULL); // update at 100Hz
+  screen.add_transition(&settings_screen, &run_screen, RUN_SCREEN, run_screen_setup);
+  screen.add_transition(&run_screen, &settings_screen, SETTINGS_SCREEN, run_screen_setup);
 
   delay(1000);
   double offsetTemp = 0;
@@ -194,23 +221,14 @@ void setup() {
   offset = offsetTemp / averageAmount;
 
   sensor.offset = -offset;
-
+  initialSettingsSetup();
 
 }
 
 void loop() {
-  //static double duty = 0;
-  //static unsigned long start = 0;
   screen.run_machine();
   polling.run_machine();
   motor.run_machine();
-
-  //duty = encoder.getPosition();
-  //duty /= 300;
-  //dcMotor.setValue(int(encoder.getPosition()));
-
-  //digitalWrite(Mtr_PWM, Start);
-  //Start = !Start;
 }
 
 
@@ -228,7 +246,7 @@ bool readMotorSleep() {
   return true;
 }
 double readMotorSpeed() {
-  return jack.motor->getCurrent();
+  return jack.motor->lastCurrent;
 }
 bool readMotorDirection() {
   return true;
@@ -240,19 +258,22 @@ double readMotorCurrent() {
 
 void polling_enter(){}
 void polling_exit(){}
-void polling_loop(){
+void polling_loop()
+{
   UI.poll();
-  if ((millis() - debugTime) > 1000 || sensor.newData) {
+  if (((millis() - debugTime) > 100 || sensor.newData)) {
     debugTime = millis();
     StaticJsonDocument<300> doc;
     // Tested Works
-    JsonObject adcJson = doc.createNestedObject("FORCE");
+    //JsonObject adcJson = doc.createNestedObject("FORCE");
     double adcValue = sensor.readADC();
     lpf.next(adcValue + sensor.offset);
+    nowWeight = lpf.output * sensor.sensitivity;
+    maxWeight = (maxWeight < nowWeight)? maxWeight : nowWeight;
     //adcValue -= offset;
     //adcJson["ADC"] = adcValue;
     //adcJson["Corrected"] = adcValue + sensor.offset;
-    adcJson["KG"] = lpf.output * sensor.sensitivity;
+    //adcJson["KG"] = nowWeight;
     //adcJson["FS"] = sensor.SPS[sensor.currentSPS];
     //adcJson["LPF"] = lpf.next(adcValue * sensor.sensitivity);
     //adcJson["OFFSET"] = sensor.offset;
@@ -275,11 +296,17 @@ void polling_loop(){
     //ledJson["STOP_LED"] = readLid();
 
     // Untested
-    //JsonObject motorJson = doc.createNestedObject("MOTOR");
-    //motorJson["CURRENT"] = dcmotor.lastCurrent;
-    //motorJson["DIRECTION"] = readMotorDirection();
-    //motorJson["SPEED"] = readMotorSpeed();
-    //motorJson["SLEEP"] = readMotorSleep();
+    JsonObject motorJson = doc.createNestedObject("MOTOR");
+    motorJson["CURRENT"] = jack.motor->lastCurrent;
+    motorJson["DIRECTION"] = jack.motor->direction;
+    motorJson["SPEED"]  = jack.motor->speed;
+    motorJson["SLEEP"] = jack.motor->sleep;
+
+    // Untested
+    JsonObject pidJson = doc.createNestedObject("PID");
+    motorJson["INPUT"] = jack.Input;
+    motorJson["SETPOINT"] = jack.Setpoint;
+    motorJson["OUTPUT"]  = jack.Output;
 
     // Tested Works
     //JsonObject encJson = doc.createNestedObject("ENCODER");
@@ -292,9 +319,17 @@ void polling_loop(){
     //JsonObject encJson = doc.createNestedObject("DISTANCE");
     //encJson["Voltage"] = map((double)analogReadFast(Dist_VAL),0,1023, 0,3.3);
 
-    //serializeJson(doc, Serial);
-    //Serial.println();
+    serializeJson(doc, Serial);
+    Serial.println();
     //Serial.println(lpf.output*sensor.sensitivity,10);
+    
+    //Serial.print(nowWeight);
+    //Serial.print(" , ");
+    //Serial.print(jack.motor->lastCurrent);
+    //Serial.print(" , ");
+    //Serial.print(jack.motor->speed);
+    //Serial.print(" , ");
+    //Serial.println();
   }
 }
 
@@ -310,16 +345,19 @@ void unloaded_exit() {
 
 }
 // testing
-void testing_enter() {
-  jack.update();
+void motoring_enter() {
+  //jack.update();
+  
 }
-void testing_loop() {
+void motoring_loop() {
   // this is used for testing the motor
+  //jack.motor->getCurrent();
+  jack.Input = jack.motor->lastCurrent*1000;
+  jack.update();
+  jack.motor->setSpeed(jack.Output);
   
-  
-
 }
-void testing_exit() {
+void motoring_exit() {
 
 }
 // homing

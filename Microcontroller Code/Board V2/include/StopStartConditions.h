@@ -18,6 +18,11 @@ class StopStartCondition {
     bool StartUp;
     bool StartDown;
 
+    bool last_StopDown;
+    bool last_StopUp;
+    bool last_StartUp;
+    bool last_StartDown;
+
   public:
     // define all of the functions
     

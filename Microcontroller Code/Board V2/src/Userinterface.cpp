@@ -79,7 +79,9 @@ Userinterface::Userinterface(int i_switchNum, Switch *i_switches[], LiquidCrysta
 
 void Userinterface::poll(){
     for(int i = 0; i<switchLength; i++){
-        switches[i]->poll();
+        Switch *temp = switches[i];
+        temp->poll();
+        //switches[i]->poll();
     }
-    Serial.println("");
+    //Serial.println("");
 }

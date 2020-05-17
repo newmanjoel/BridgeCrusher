@@ -11,7 +11,7 @@ class HydraulicMotor
     // PID Variables
     double Setpoint, Input, Output;
     // Default PID Values
-    double Kp=1, Ki=1, Kd=0;
+    double Kp=0.5, Ki=0.1, Kd=0;
     // ----- object ----- (has a relationships)
     DCMotor* motor;
     StopStartCondition* safety;
