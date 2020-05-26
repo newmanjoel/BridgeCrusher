@@ -41,3 +41,34 @@ void HydraulicMotor::update(){
   */
   
 }
+
+void HydraulicMotor::toJson(JsonObject inputJsonObject)
+{
+  Reporting config = *Reporting::instance();
+  if(config.MOTOR)
+  {
+    JsonObject motorJson = inputJsonObject.createNestedObject("MOTOR");
+    motorJson["STATUS"] = "Untested";
+    motorJson["CURRENT"] = motor->lastCurrent;
+    motorJson["DIRECTION"] = motor->direction;
+    motorJson["SPEED"]  = motor->speed;
+    motorJson["SLEEP"] = motor->sleep;
+  }
+  if (config.PID)
+  {
+    JsonObject controlJson = inputJsonObject.createNestedObject("PID");
+    controlJson["STATUS"] = "Untested";
+    controlJson["INPUT"] = Input;
+    controlJson["SETPOINT"] = Setpoint;
+    controlJson["OUTPUT"]  = Output;
+  }
+  if(config.LIMITS)
+  {
+    JsonObject limitsJson = inputJsonObject.createNestedObject("LIMITS");
+    limitsJson["STAUTS"] = "Untested";
+    limitsJson["MAX"] = safety->Max->NO;
+    limitsJson["MIN"] = safety->Min->NO;
+    limitsJson["LID"] = safety->Lid->NO;
+  }
+
+}

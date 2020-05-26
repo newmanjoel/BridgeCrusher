@@ -4,7 +4,7 @@
 #include "RotaryEncoderJoel.h"
 #include "LiquidCrystal_PCF8574.h"
 #include "Filter.h"
-#include "ADS1246.cpp"
+#include "ADS1246.h"
 #include "HydraulicMotor.h"
 #include "UserInterface.h"
 

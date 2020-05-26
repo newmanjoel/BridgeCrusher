@@ -1,7 +1,7 @@
 #include "UserInterface.h"
 #include "Settings.h"
 #include "HydraulicMotor.h"
-#include "ADS1246.cpp"
+#include "ADS1246.h"
 #include "Fsm.h"
 #include "stdio.h"
 #include "SettingsScreen.h"

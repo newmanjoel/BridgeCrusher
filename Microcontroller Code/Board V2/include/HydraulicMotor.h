@@ -3,6 +3,7 @@
 #include "DCMotor.h"
 #include "PID_v1.h"
 #include "StopStartConditions.h"
+#include "Settings.h"
 
 class HydraulicMotor
 {
@@ -27,6 +28,8 @@ class HydraulicMotor
 
     // primary looping point
     void update();
+
+    void toJson(JsonObject inputJsonObject);
 
     
   private:

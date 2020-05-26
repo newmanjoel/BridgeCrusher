@@ -1,7 +1,7 @@
 #include "BridgeCrusherPins.h"
 #include "StopStartConditions.h"
 #include "RotaryEncoderJoel.h"
-#include "ADS1246.cpp"
+#include "ADS1246.h"
 #include <ArduinoJson.h>
 #include "HydraulicMotor.h"
 #include <Fsm.h>
@@ -21,7 +21,10 @@
 #include "Settings.h"
 #include "SettingsScreen.h"
 #include "Motor_Testing.h"
-#include "Settings.h"
+#include "Arduino.h"
+#include <SPI.h>
+
+
 
 
 void setup();
@@ -52,6 +55,8 @@ void calibrating_exit();
 void polling_enter();
 void polling_loop();
 void polling_exit();
+
+void mySerialEvent();
 
 
 
@@ -138,10 +143,17 @@ int displayRefreshRate = 1000 / 3; // this is in ms. 3Hz
 int RUN_SCREEN = 1;
 int SETTINGS_SCREEN = 2;
 
+Reporting *Reporting::s_instance = 0;
+Reporting config = *Reporting::instance();
+
 
 void setup() {
   // Start comms on usb
-  Serial.begin(115200);
+  Serial.begin(57600);
+  Serial.setTimeout(200);
+  
+  //Reporting config = *Reporting::instance();
+  config.defaults();
 
   UI.lcd->begin(20, 4);
   UI.lcd->home();
@@ -229,6 +241,7 @@ void loop() {
   screen.run_machine();
   polling.run_machine();
   motor.run_machine();
+  mySerialEvent();
 }
 
 
@@ -261,75 +274,92 @@ void polling_exit(){}
 void polling_loop()
 {
   UI.poll();
+
   if (((millis() - debugTime) > 100 || sensor.newData)) {
+  //if (((millis() - debugTime) > 100)) {
     debugTime = millis();
-    StaticJsonDocument<300> doc;
-    // Tested Works
-    //JsonObject adcJson = doc.createNestedObject("FORCE");
-    double adcValue = sensor.readADC();
-    lpf.next(adcValue + sensor.offset);
-    nowWeight = lpf.output * sensor.sensitivity;
-    maxWeight = (maxWeight < nowWeight)? maxWeight : nowWeight;
-    //adcValue -= offset;
-    //adcJson["ADC"] = adcValue;
-    //adcJson["Corrected"] = adcValue + sensor.offset;
-    //adcJson["KG"] = nowWeight;
-    //adcJson["FS"] = sensor.SPS[sensor.currentSPS];
-    //adcJson["LPF"] = lpf.next(adcValue * sensor.sensitivity);
-    //adcJson["OFFSET"] = sensor.offset;
+    //StaticJsonDocument<500> doc;
+    DynamicJsonDocument doc(1000);
+    config = *Reporting::instance();
 
-
-    // Untested
-    //JsonObject limitsJson = doc.createNestedObject("LIMITS");
-    //limitsJson["MAX"] = Max;
-    //limitsJson["MIN"] = Min;
-    //limitsJson["LID"] = Lid;
-
-    // Untested
-    //JsonObject hmiJson = doc.createNestedObject("HMI");
-    //hmiJson["START"] = Start;
-    //hmiJson["STOP"] = Stop;
-
-    // Untested
-    //JsonObject ledJson = doc.createNestedObject("LEDS");
-    //ledJson["START_LED"] = readLid();
-    //ledJson["STOP_LED"] = readLid();
-
-    // Untested
-    JsonObject motorJson = doc.createNestedObject("MOTOR");
-    motorJson["CURRENT"] = jack.motor->lastCurrent;
-    motorJson["DIRECTION"] = jack.motor->direction;
-    motorJson["SPEED"]  = jack.motor->speed;
-    motorJson["SLEEP"] = jack.motor->sleep;
-
-    // Untested
-    JsonObject pidJson = doc.createNestedObject("PID");
-    motorJson["INPUT"] = jack.Input;
-    motorJson["SETPOINT"] = jack.Setpoint;
-    motorJson["OUTPUT"]  = jack.Output;
-
-    // Tested Works
-    //JsonObject encJson = doc.createNestedObject("ENCODER");
-    //encJson["POSITION"] = encoder.getPosition();
-    //encJson["DIRECTION"] = encoder.getDirection();
-    //encJson["BUTTON"] = encoder.getSwitch();
-
-
-    // Tested Works
-    //JsonObject encJson = doc.createNestedObject("DISTANCE");
-    //encJson["Voltage"] = map((double)analogReadFast(Dist_VAL),0,1023, 0,3.3);
-
-    serializeJson(doc, Serial);
-    Serial.println();
-    //Serial.println(lpf.output*sensor.sensitivity,10);
+    doc["Time"] = debugTime;
     
-    //Serial.print(nowWeight);
-    //Serial.print(" , ");
-    //Serial.print(jack.motor->lastCurrent);
-    //Serial.print(" , ");
-    //Serial.print(jack.motor->speed);
-    //Serial.print(" , ");
-    //Serial.println();
+    if(config.CONFIG)
+    {
+      JsonObject configJson = doc.createNestedObject("Config");
+      config.toJson(configJson);
+    }
+    
+
+    if(config.SSENSOR){
+      JsonObject adcJson = doc.createNestedObject("SSENSOR");
+      sensor.toJson(adcJson);
+    }
+    // Tested Works
+    /*
+    if (config.FORCE)
+    {
+      JsonObject adcJson = doc.createNestedObject("FORCE");
+      double adcValue = sensor.readADC();
+      lpf.next(adcValue + sensor.offset);
+      nowWeight = lpf.output * sensor.sensitivity;
+      maxWeight = (maxWeight < nowWeight)? maxWeight : nowWeight;
+      adcValue -= offset;
+      adcJson["STATUS"] ="Tested";
+      adcJson["ADC"] = adcValue;
+      adcJson["Corrected"] = adcValue + sensor.offset;
+      adcJson["KG"] = nowWeight;
+      adcJson["FS"] = sensor.SPS[sensor.currentSPS];
+      adcJson["LPF"] = lpf.next(adcValue * sensor.sensitivity);
+      adcJson["OFFSET"] = sensor.offset;
+    }
+    */
+
+    // Untested
+    if (config.HMI)
+    {
+      JsonObject hmiJson = doc.createNestedObject("HMI");
+      hmiJson["STATUS"] = "Untested";
+      //hmiJson["START"] = Start;
+      //hmiJson["STOP"] = Stop;
+    }
+
+    // Untested
+    if (config.LEDS)
+    {
+      JsonObject ledJson = doc.createNestedObject("LEDS");
+      ledJson["STATUS"] = "Untested";
+      //ledJson["START_LED"] = readLid();
+      //ledJson["STOP_LED"] = readLid();
+    }
+
+    // Untested
+    if (config.JACK)
+    {
+      JsonObject motorJson = doc.createNestedObject("JACK");
+      jack.toJson(motorJson);
+    }
+
+    // Tested Works
+    if (config.ENCODER)
+    {
+      JsonObject encJson = doc.createNestedObject("ENCODER");
+      encJson["STATUS"] ="Tested";
+      encJson["POSITION"] = encoder.getPosition();
+      encJson["DIRECTION"] = encoder.getDirection();
+      encJson["BUTTON"] = encoder.getSwitch();
+    }
+
+
+    // Tested Works
+    if (config.DISTANCE)
+    {
+      JsonObject distJson = doc.createNestedObject("DISTANCE");
+      distJson["STATUS"] = "Tested";
+      distJson["Voltage"] = analogReadFast(Dist_VAL);
+    }
+    serializeJson(doc, Serial);
+    Serial.print('\n');
   }
 }
 
@@ -383,4 +413,77 @@ void calibrating_exit() {
 // Utility functions
 double map(double x, double in_min, double in_max, double out_min, double out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void mySerialEvent()
+{
+  if(Serial.available()<10)
+  {
+    return;
+  }
+  if(Serial.available()>10)
+  {
+    StaticJsonDocument<200> sendBack[2];
+    int amountToSendBack = -1;
+    
+    while(Serial.available()>10)
+    {
+      amountToSendBack++;
+      //byte buffer[512];
+      //Serial.readBytesUntil('\n',buffer,512);
+      //String inputMessage = String((char *)buffer);
+      //String inputMessage = Serial.readStringUntil('\n');
+      //ReadLoggingStream loggingStream(Serial, Serial);
+      
+
+      StaticJsonDocument<200> response ; //= sendBack[amountToSendBack];
+      StaticJsonDocument<500> doc;
+      DeserializationError err = deserializeJson(doc, Serial);
+      switch (err.code()) {
+          case DeserializationError::Ok:
+              response["Sucess"] = true;
+              if (doc.containsKey("Config"))
+              {
+                Reporting::instance()->json(doc["Config"].as<JsonVariant>()); 
+              }
+              if (doc.containsKey("SSENSOR"))
+              {
+               sensor.jsonConfig(doc["SSENSOR"].as<JsonVariant>()); 
+              }
+              if (doc.containsKey("Command"))
+              {
+                JsonObject Commands = doc["Command"].as<JsonObject>();
+                if(Commands.containsKey("Test"))
+                {
+                  //jack.safety->json(Commands["Test"].as<JsonObject>());
+                  jack.safety->test = Commands["Test"].as<bool>();
+                  response["Executed"] = "Test";
+                  response["Value"] = jack.safety->test;
+                }
+              }
+              break;
+          case DeserializationError::InvalidInput:
+              response["Sucess"] = false;
+              response["Reason"] = "Invalid Input";
+              break;
+          case DeserializationError::NoMemory:
+              response["Sucess"] = false;
+              response["Reason"] = "NoMemory";
+              break;
+          default:
+              response["Sucess"] = false;
+              response["Reason"] = "Deserialization failed";
+              break;
+      };
+    
+      sendBack[amountToSendBack] = response;
+      
+    };
+    for(int i = 0; i<=amountToSendBack ;i++)
+    {
+      serializeJson(sendBack[i], Serial);
+      Serial.print('\n');
+    }
+
+  }
 }

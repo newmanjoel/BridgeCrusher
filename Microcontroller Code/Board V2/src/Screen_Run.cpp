@@ -34,6 +34,12 @@ void run_screen_setup()
 // Testing Screen
 void run_screen_enter() {
     // Print a message to the LCD.
+    sprintf(runScreen::buff, runScreen::numberFormat, jack.safety->test);
+    sprintf(runScreen::largeBuffer, runScreen::mainFormat, "", runScreen::buff, "");
+    UI.lcd->setCursor(0, 0);
+    UI.lcd->print(jack.safety->test);
+
+
     sprintf(runScreen::buff, runScreen::numberFormat, jack.motor->lastCurrent*1000);
     sprintf(runScreen::largeBuffer, runScreen::mainFormat, "amp", runScreen::buff, runScreen::units);
     UI.lcd->setCursor(0, 1);
@@ -73,7 +79,7 @@ void run_screen_loop() {
 
     if (newSelect)
     {
-        screen.trigger(SETTINGS_SCREEN);
+        //screen.trigger(SETTINGS_SCREEN);
     }
 
 

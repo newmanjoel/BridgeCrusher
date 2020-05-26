@@ -6,7 +6,7 @@
 #include "BridgeCrusherPins.h"
 #include "RotaryEncoderJoel.h"
 #include "HydraulicMotor.h"
-#include "ADS1246.cpp"
+#include "ADS1246.h"
 #include "StopStartConditions.h"
 
 
