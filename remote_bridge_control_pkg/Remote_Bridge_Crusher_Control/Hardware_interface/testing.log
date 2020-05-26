@@ -1,0 +1,41 @@
+2020-05-18 03:30:24,664 - MasterController - DEBUG - Creating all of the daemons
+2020-05-18 03:30:24,665 - MasterController - DEBUG - starting: Listener Process
+2020-05-18 03:30:24,666 - MasterController - DEBUG - started: Listener Process
+2020-05-18 03:30:24,666 - Listening - INFO - listening on 127.0.0.1:9998
+2020-05-18 03:30:24,666 - MasterController - DEBUG - starting: Broadcaster Process
+2020-05-18 03:30:24,668 - Broadcasting - DEBUG - starting the broadcasting loop
+2020-05-18 03:30:24,668 - MasterController - DEBUG - started: Broadcaster Process
+2020-05-18 03:30:24,668 - Broadcasting - INFO - broadcasting to 127.0.0.1:9999
+2020-05-18 03:30:24,669 - MasterController - DEBUG - All threads running
+2020-05-18 03:30:32,247 - Listening - DEBUG - RAW RECV: '{'Config': {'ENCODER': True}}' from IP: ('127.0.0.1', 61050)
+2020-05-18 03:30:32,248 - Listening - DEBUG - TO SEND: '{"Config": {"ENCODER": true}}'
+2020-05-18 03:30:33,249 - Broadcasting - INFO - 'utf-8' codec can't decode byte 0x80 in position 6: invalid start byte
+2020-05-18 03:30:33,306 - Broadcasting - ERROR - Error: Expecting value: line 1 column 1 (char 0), rawDataIn: Invalid input!{"Config":{"FORCE":false,"LIMITS":false,"HMI":false,"LEDS":false,"MOTOR":false,"PID":false,"DISTANCE":false,"ENCODER":false,"CONFIG":true,"JACK":false}}
+
+2020-05-18 03:30:36,677 - root - DEBUG - Telling all threads to Stop
+2020-05-18 03:30:36,677 - root - INFO - Waiting on Listener thread to end
+2020-05-18 03:30:36,677 - Broadcasting - INFO - Broadcasting Has stopped
+2020-05-18 03:30:36,678 - Broadcasting - INFO - Broadcasting has ended
+2020-05-18 03:30:37,248 - Listening - INFO - Listening has ended
+2020-05-18 03:30:37,249 - root - INFO - Waiting on Broadcaster thread to end
+2020-05-18 03:30:37,249 - root - INFO - ALL THREADS HAVE EXITED
+2020-05-18 03:30:37,251 - Microcontroller - INFO - closed connection to port: COM8
+2020-05-18 03:39:46,249 - Microcontroller - DEBUG - scanning ... name:Communications Port (COM1), port:COM1, other:ACPI\PNP0501\0
+2020-05-18 03:39:46,250 - Microcontroller - DEBUG - scanning ... name:USB Serial Device (COM8), port:COM8, other:USB VID:PID=239A:800F SER=6 LOCATION=1-7:x.0
+2020-05-18 03:39:46,250 - Microcontroller - INFO - Connected to: USB Serial Device (COM8) -> COM8
+2020-05-18 03:39:46,260 - MasterController - DEBUG - Creating all of the daemons
+2020-05-18 03:39:46,260 - MasterController - DEBUG - starting: Listener Process
+2020-05-18 03:39:46,261 - MasterController - DEBUG - started: Listener Process
+2020-05-18 03:39:46,261 - Listening - INFO - listening on 127.0.0.1:9998
+2020-05-18 03:39:46,262 - MasterController - DEBUG - starting: Broadcaster Process
+2020-05-18 03:39:46,263 - Broadcasting - DEBUG - starting the broadcasting loop
+2020-05-18 03:39:46,263 - MasterController - DEBUG - started: Broadcaster Process
+2020-05-18 03:39:46,264 - MasterController - DEBUG - All threads running
+2020-05-18 03:39:46,264 - Broadcasting - INFO - broadcasting to 127.0.0.1:9999
+2020-05-18 03:39:52,335 - Listening - DEBUG - RAW RECV: '{'Config': {'ENCODER': True}}' from IP: ('127.0.0.1', 59676)
+2020-05-18 03:39:52,336 - Listening - DEBUG - TO SEND: '{"Config": {"ENCODER": true}}'
+2020-05-18 03:39:53,337 - Broadcasting - INFO - 'utf-8' codec can't decode byte 0x80 in position 6: invalid start byte
+2020-05-18 03:39:57,355 - Listening - DEBUG - RAW RECV: '{'Config': {'ENCODER': True}}' from IP: ('127.0.0.1', 59677)
+2020-05-18 03:39:57,356 - Listening - DEBUG - TO SEND: '{"Config": {"ENCODER": true}}'
+2020-05-18 03:40:04,275 - root - DEBUG - Telling all threads to Stop
+2020-05-18 03:40:04,275 - root - INFO - Waiting on Listener thread to end
