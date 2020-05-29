@@ -1,62 +1,79 @@
 #ifndef StopStartCondition_h
 #define StopStartCondition_h
+#include "Wire.h"
+#include "Sensors.h"
 #include "UserInterface.h"
+#include "JsonInterface.h"
 
-class StartStop
+
+class StartStop : public JsonInterface
 {
   public:
-    StartStop();
+    Sensors sensors;
+    Switches switches;
 
-    virtual bool shouldStop();
-    virtual bool canStart();
-    virtual void toJson(JsonObject inputJsonObject); 
-    virtual void json(JsonObject inputJsonObject);
+  public:
+    bool running;
+    bool shouldStop();
+    bool canStart();
 
 };
 
 class VerticleMovement : public StartStop
 {
   public:
-    virtual bool safeToMoveUp();
-    virtual bool safeToMoveDown();
+    bool safeToMoveUp();
+    bool safeToMoveDown();
 };
 
-class StopStartCondition 
+class JackSafety: public VerticleMovement
 {
-    // Note this should probably be a singleton but because its just me then I feel like I can get away with stuff like this.
-
   public:
-    // define all of the variables
-    Switch* Stop;
-    Switch* Start;
-    Switch* Max;
-    Switch* Min;
-    Switch* Lid;
+    void begin()
+    {
+      sensors = *Sensors::instance();
+      switches = *Switches::instance();
+    };
 
-    bool StopDown;
-    bool StopUp;
-    bool StartUp;
-    bool StartDown;
+    bool canStart()
+    {
+      if(switches.start.NO_contact)
+      {
+        return true;
+      }
+      return false;
+    };
 
-    bool last_StopDown;
-    bool last_StopUp;
-    bool last_StartUp;
-    bool last_StartDown;
+    bool safeToMoveUp()
+    {
+      if(switches.max.NC_contact)
+      {
+        return false;
+      }
+      return true;
+    };
 
-    bool test;
+    bool safeToMoveDown()
+    {
+      if(switches.min.value)
+      {
+        return true;
+      }
+      return false;
+    };
 
-  public:
-    // define all of the functions
-    
-    StopStartCondition(Switch *i_stop, Switch *i_start, Switch *i_max,
-      Switch* i_min, Switch* i_lid);
-    void stop_logic();
-
-   
-
-  private:
+    bool shouldStop()
+    {
+      if( switches.min.NC_contact || 
+          switches.max.NC_contact || 
+          switches.lid.NC_contact ||
+          switches.stop.NC_contact)
+          {
+            return true;
+          }
+          return false;
+    };
 
 };
-
 
 #endif

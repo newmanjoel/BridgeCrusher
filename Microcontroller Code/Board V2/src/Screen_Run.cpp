@@ -2,17 +2,7 @@
 #include "Settings.h"
 #include "Fsm.h"
 
-extern Userinterface UI;
-extern Filter lpf;
-extern Switch encoderSw;
-extern volatile double maxWeight;
-extern volatile double nowWeight;
-extern NumberSetting pid_setpoint;
-extern Fsm screen;
-extern int SETTINGS_SCREEN;
-extern HydraulicMotor jack;
-
-
+/*
 namespace runScreen
 {
     const char numberFormat[] = "%8.3f";
@@ -34,7 +24,7 @@ void run_screen_setup()
 // Testing Screen
 void run_screen_enter() {
     // Print a message to the LCD.
-    sprintf(runScreen::buff, runScreen::numberFormat, jack.safety->test);
+    sprintf(runScreen::buff, runScreen::numberFormat, (double)jack.safety->test);
     sprintf(runScreen::largeBuffer, runScreen::mainFormat, "", runScreen::buff, "");
     UI.lcd->setCursor(0, 0);
     UI.lcd->print(jack.safety->test);
@@ -92,3 +82,4 @@ void run_screen_exit() {
     //jack.motor->setSpeed(0);
     //UI.lcd->clear();
 }
+*/

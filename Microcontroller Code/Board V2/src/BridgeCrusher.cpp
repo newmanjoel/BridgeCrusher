@@ -1,14 +1,17 @@
 #include "BridgeCrusherPins.h"
+#include "ProgramUtilities.h"
+
+
 #include "StopStartConditions.h"
 #include "RotaryEncoderJoel.h"
-#include "ADS1246.h"
+
 #include <ArduinoJson.h>
 #include "HydraulicMotor.h"
 #include <Fsm.h>
-#include <avdweb_AnalogReadFast.h>
+
 #include "Wire.h"
 //#include "Adafruit_LiquidCrystal.h"
-#include "Filter.h"
+
 #include "ISRs.h"
 
 // requires this library. Version 1.2. Can be found in the arduino library manager.
@@ -16,13 +19,13 @@
 #include <LiquidCrystal_PCF8574.h>
 #include <Wire.h>
 
-#include "Screen_Run.h"
+
 #include "UserInterface.h"
-#include "Settings.h"
-#include "SettingsScreen.h"
 #include "Motor_Testing.h"
 #include "Arduino.h"
 #include <SPI.h>
+
+#include "ChangeableSettings.h"
 
 
 
@@ -56,10 +59,12 @@ void polling_enter();
 void polling_loop();
 void polling_exit();
 
+void updateRunScreen();
+
 void mySerialEvent();
 
 
-
+/*
 NO_Switch encoderSw(Enc_SW_NO, String("Encoder Switch"));
 NO_Switch startSw(Start_NO, String("Start Button"));
 NC_Switch stopSw(Stop_NC, String("Stop Button"));
@@ -99,6 +104,7 @@ Userinterface UI(6, allSwitches, &lcd, &encoder);
 
 Filter lpf;
 Filter lpf_stage2;
+*/
 
 // States
 /*
@@ -118,13 +124,14 @@ State homing(&homing_enter, &homing_loop, &homing_exit);
 State calibrating(&calibrating_enter, &calibrating_loop, &calibrating_exit);
 State polling_state(&polling_enter, &polling_loop, &polling_exit);
 
-State run_screen(&run_screen_enter, &run_screen_loop, &run_screen_exit);
-State settings_screen(&singleSetting_entry,&singleSetting_loop, &singleSetting_exit);
-State motor_testing_screen(&motor_testing_screen_enter, &motor_testing_screen_loop, &motor_testing_screen_exit);
-
+//State run_screen(&run_screen_enter, &run_screen_loop, &run_screen_exit);
+//State settings_screen(&singleSetting_entry,&singleSetting_loop, &singleSetting_exit);
+//State motor_testing_screen(&motor_testing_screen_enter, &motor_testing_screen_loop, &motor_testing_screen_exit);
+RunScreen runScreenObject;
+State newScreen(NULL, &updateRunScreen , NULL);
 
 //Fsm fsm(&unloaded);
-Fsm screen(&run_screen);
+Fsm screen(&newScreen);
 Fsm motor(&motoring);
 Fsm polling(&polling_state);
 
@@ -143,26 +150,48 @@ int displayRefreshRate = 1000 / 3; // this is in ms. 3Hz
 int RUN_SCREEN = 1;
 int SETTINGS_SCREEN = 2;
 
-Reporting *Reporting::s_instance = 0;
+LCD lcd = *LCD::instance();
 Reporting config = *Reporting::instance();
+Sensors io = *Sensors::instance();
+Userinterface UI = *Userinterface::instance();
 
+
+#define TESTING
 
 void setup() {
+  SensorBase sd;
+  SingleInstance<LCD> a1;
+  SingleInstance<Reporting> a2;
+  SingleInstance<RotaryEncoderJoel> a3;
+  SingleInstance<Userinterface> a4;
+  SingleInstance<Sensors> a5;
+
+  Reporting config1;
+  RotaryEncoderJoel enc1;
+  Userinterface UI1;
+  Sensors io1;
+  LCD lcd1;
+  
   // Start comms on usb
   Serial.begin(57600);
   Serial.setTimeout(200);
+
+  // setup the reporting instance  
+  config.begin();
+
+  // setup the LCD instance
+  lcd.begin();
+  lcd.startup();
+
+  // setup the Switches instance
+  // one of the sensors has SPI in it so make sure to start it first!
+  SPI.begin();
+  io.begin();
+
+  // setup the UI instance  
+  UI.begin();
+
   
-  //Reporting config = *Reporting::instance();
-  config.defaults();
-
-  UI.lcd->begin(20, 4);
-  UI.lcd->home();
-  UI.lcd->clear();
-  UI.lcd->noBlink();
-  UI.lcd->noCursor();
-  UI.lcd->setBacklight(255);
- 
-
   EncoderClick = false;
   EncoderValue = 0;
 
@@ -205,23 +234,24 @@ void setup() {
   //   0.18261049892987757, -0.18757390839139598, 0.1826104989298776, 1.4034582124101722, -0.5117751386002309,// b0, b1, b2, a1, a2
   //   0.25, -0.44774427666635713, 0.25000000000000006, 1.7542884087063622, -0.8399913314609916// b0, b1, b2, a1, a2
 
-  lpf_stage2.begin(0.18261049892987757, -0.18757390839139598, 0.1826104989298776, 1.4034582124101722, -0.5117751386002309);
-  lpf.begin(0.25, -0.44774427666635713, 0.25000000000000006, 1.7542884087063622, -0.8399913314609916, &lpf_stage2);
+  //lpf_stage2.begin(0.18261049892987757, -0.18757390839139598, 0.1826104989298776, 1.4034582124101722, -0.5117751386002309);
+  //lpf.begin(0.25, -0.44774427666635713, 0.25000000000000006, 1.7542884087063622, -0.8399913314609916, &lpf_stage2);
 
-  jack.setup(Mtr_PWM, Mtr_CS, Mtr_DIR, Mtr_SLP, safety);
+  //jack.setup(Mtr_PWM, Mtr_CS, Mtr_DIR, Mtr_SLP, safety);
 
-  sensor.begin(Adc_CS, Adc_STR, Adc_RST);
-  SPI.begin();
-  sensor.setupADC();
+  //sensor.begin(Adc_CS, Adc_STR, Adc_RST);
+  //SPI.begin();
+  //sensor.setupADC();
 
-  screen.add_timed_transition(&run_screen, &run_screen, displayRefreshRate, NULL);
-  screen.add_timed_transition(&settings_screen, &settings_screen, displayRefreshRate, NULL);
+  screen.add_timed_transition(&newScreen, &newScreen, displayRefreshRate, NULL);
+  //screen.add_timed_transition(&run_screen, &run_screen, displayRefreshRate, NULL);
+  //screen.add_timed_transition(&settings_screen, &settings_screen, displayRefreshRate, NULL);
   //screen.add_timed_transition(&motor_testing_screen, &motor_testing_screen, displayRefreshRate, NULL);
 
   motor.add_timed_transition(&motoring, &motoring, 10, NULL); // update at 100Hz
-  screen.add_transition(&settings_screen, &run_screen, RUN_SCREEN, run_screen_setup);
-  screen.add_transition(&run_screen, &settings_screen, SETTINGS_SCREEN, run_screen_setup);
-
+  //screen.add_transition(&settings_screen, &run_screen, RUN_SCREEN, run_screen_setup);
+  //screen.add_transition(&run_screen, &settings_screen, SETTINGS_SCREEN, run_screen_setup);
+  /* Old sensor offset code  
   delay(1000);
   double offsetTemp = 0;
   int averageAmount = 0;
@@ -233,7 +263,9 @@ void setup() {
   offset = offsetTemp / averageAmount;
 
   sensor.offset = -offset;
-  initialSettingsSetup();
+  */
+
+  //initialSettingsSetup();
 
 }
 
@@ -245,7 +277,7 @@ void loop() {
 }
 
 
-
+/*
 bool readMax() {
   return digitalRead(Max_NC);
 }
@@ -267,15 +299,16 @@ bool readMotorDirection() {
 double readMotorCurrent() {
   return jack.motor->lastCurrent;
 }
+*/
 
 
 void polling_enter(){}
 void polling_exit(){}
 void polling_loop()
 {
-  UI.poll();
+  io.poll();
 
-  if (((millis() - debugTime) > 100 || sensor.newData)) {
+  if (((millis() - debugTime) > 100 || io.force.sensor.newData)) {
   //if (((millis() - debugTime) > 100)) {
     debugTime = millis();
     //StaticJsonDocument<500> doc;
@@ -283,7 +316,10 @@ void polling_loop()
     config = *Reporting::instance();
 
     doc["Time"] = debugTime;
-    
+    io.toJson(doc.as<JsonObject>());
+    UI.toJson(doc.as<JsonObject>());
+
+    /*
     if(config.CONFIG)
     {
       JsonObject configJson = doc.createNestedObject("Config");
@@ -296,7 +332,7 @@ void polling_loop()
       sensor.toJson(adcJson);
     }
     // Tested Works
-    /*
+    
     if (config.FORCE)
     {
       JsonObject adcJson = doc.createNestedObject("FORCE");
@@ -313,7 +349,7 @@ void polling_loop()
       adcJson["LPF"] = lpf.next(adcValue * sensor.sensitivity);
       adcJson["OFFSET"] = sensor.offset;
     }
-    */
+    
 
     // Untested
     if (config.HMI)
@@ -358,6 +394,7 @@ void polling_loop()
       distJson["STATUS"] = "Tested";
       distJson["Voltage"] = analogReadFast(Dist_VAL);
     }
+    */
     serializeJson(doc, Serial);
     Serial.print('\n');
   }
@@ -382,9 +419,9 @@ void motoring_enter() {
 void motoring_loop() {
   // this is used for testing the motor
   //jack.motor->getCurrent();
-  jack.Input = jack.motor->lastCurrent*1000;
-  jack.update();
-  jack.motor->setSpeed(jack.Output);
+  //jack.Input = jack.motor->lastCurrent*1000;
+  //jack.update();
+  //jack.motor->setSpeed(jack.Output);
   
 }
 void motoring_exit() {
@@ -410,9 +447,10 @@ void calibrating_loop() {
 void calibrating_exit() {
 
 }
-// Utility functions
-double map(double x, double in_min, double in_max, double out_min, double out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+
+void updateRunScreen()
+{
+  runScreenObject.update();
 }
 
 void mySerialEvent()
@@ -442,24 +480,17 @@ void mySerialEvent()
       switch (err.code()) {
           case DeserializationError::Ok:
               response["Sucess"] = true;
-              if (doc.containsKey("Config"))
+              if (doc.containsKey(config.name))
               {
-                Reporting::instance()->json(doc["Config"].as<JsonVariant>()); 
+                config.fromJson(doc[config.name].as<JsonObject>());
               }
-              if (doc.containsKey("SSENSOR"))
+              if (doc.containsKey(io.name))
               {
-               sensor.jsonConfig(doc["SSENSOR"].as<JsonVariant>()); 
+                io.fromJson(doc[io.name].as<JsonObject>()); 
               }
-              if (doc.containsKey("Command"))
+              if (doc.containsKey(UI.name))
               {
-                JsonObject Commands = doc["Command"].as<JsonObject>();
-                if(Commands.containsKey("Test"))
-                {
-                  //jack.safety->json(Commands["Test"].as<JsonObject>());
-                  jack.safety->test = Commands["Test"].as<bool>();
-                  response["Executed"] = "Test";
-                  response["Value"] = jack.safety->test;
-                }
+                UI.fromJson(doc[UI.name].as<JsonObject>());
               }
               break;
           case DeserializationError::InvalidInput:

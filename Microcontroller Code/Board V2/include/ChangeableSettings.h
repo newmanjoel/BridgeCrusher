@@ -24,7 +24,19 @@ public:
     // how much to increment or decrement by
     T stepValue;
 
+    ChangeableSetting(){};
+
     ChangeableSetting(String i_name, T *i_value, T i_defaultValue, T i_min, T i_max, T stepValue)
+    {
+        name = i_name;
+        value = i_value;
+        defaultValue = i_defaultValue;
+        min = i_min;
+        max = i_max;
+        stepValue = stepValue;
+    };
+
+    void setup(String i_name, T *i_value, T i_defaultValue, T i_min, T i_max, T stepValue)
     {
         name = i_name;
         value = i_value;

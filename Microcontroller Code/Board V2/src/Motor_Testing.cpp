@@ -32,6 +32,7 @@ double motor_map(double x, double in_min, double in_max, double out_min, double 
 // Testing Screen
 void  motor_testing_screen_enter() {
     // Print a message to the LCD.
+    /*
     UI.lcd->clear();
 
     sprintf(motor_testing::largeBuffer, motor_testing::mainFormat, "Input: ", nowWeight);
@@ -49,6 +50,7 @@ void  motor_testing_screen_enter() {
     sprintf(motor_testing::largeBuffer, motor_testing::mainFormat, "Out: ", jack.Output);
     UI.lcd->setCursor(0, 3);
     UI.lcd->printf(motor_testing::largeBuffer);
+    */
     
 
 }

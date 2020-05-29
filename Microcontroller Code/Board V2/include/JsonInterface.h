@@ -12,10 +12,10 @@ class JsonInterface
         String name; 
 
         // append the objects data into a json Object
-        virtual void toJson(JsonObject inputJsonObject) = 0;
+        void toJson(JsonObject inputJsonObject){};
 
         // set data inside the object from the json Object
-        virtual void fromJson(JsonObject inputJsonObject) = 0;
+        void fromJson(JsonObject inputJsonObject){};
 
         // to to allow runtime setting of names
         void begin(){};

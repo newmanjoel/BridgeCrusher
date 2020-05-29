@@ -1,6 +1,6 @@
 #ifndef Screen_Run_h
 #define Screen_Run_h
-
+/*
 #include "RotaryEncoderJoel.h"
 #include "LiquidCrystal_PCF8574.h"
 #include "Filter.h"
@@ -15,5 +15,5 @@ void run_screen_loop();
 void run_screen_exit();
 void run_screen_setup();
 
-
+*/
 #endif

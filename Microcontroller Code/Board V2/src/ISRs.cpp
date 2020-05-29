@@ -1,43 +1,40 @@
 #include "ISRs.h"
-
-
-extern RotaryEncoderJoel encoder;
-extern HydraulicMotor jack;
-extern ADS1246 sensor;
-extern StopStartCondition safety;
+extern Sensors io;
 
 void start_ISR() {
-  safety.Start->poll();
-  //digitalRead(Start_NO) ? safety.Start = true : safety.Start = false;
-  safety.stop_logic();
+  //safety.Start->poll();
+  //safety.stop_logic();
+  io.switches.start.poll();
 }
 
 void stop_ISR() {
-  safety.Stop->poll();
-  //digitalRead(Stop_NC) ? safety.Stop = false : safety.Stop = true;
-  safety.stop_logic();
+  //safety.Stop->poll();
+  //safety.stop_logic();
+
+  io.switches.stop.poll();
 }
 
 void lid_ISR() {
-  safety.Lid->poll();
-  //digitalRead(Lid_NC) ? safety.Lid = false : safety.Lid = true;
-  safety.stop_logic();
+  //safety.Lid->poll();
+  //safety.stop_logic();
+  io.switches.lid.poll();
 }
 
 void max_ISR() {
-  safety.Max->poll();
-  //digitalRead(Max_NC) ? safety.Max = false : safety.Max = true;
-  safety.stop_logic();
+  //safety.Max->poll();
+  //safety.stop_logic();
+  io.switches.max.poll();
 }
 
 void min_ISR() {
-  safety.Min->poll();
-  //digitalRead(Min_NC) ? safety.Min = false : safety.Min = true;
-  safety.stop_logic();
+  //safety.Min->poll();
+  //safety.stop_logic();
+  io.switches.min.poll();
 }
 
 void adc_ISR() {
-  sensor.setSensorReady();
+  //sensor.setSensorReady();
+  io.force.sensor.setSensorReady();
 }
 void motor_ISR() {
   //jack.motor->lastCurrent;
@@ -45,5 +42,6 @@ void motor_ISR() {
 
 
 void encoder_ISR() {
-  encoder.tick();
+  //encoder.tick();
+  io.encoder.tick();
 }

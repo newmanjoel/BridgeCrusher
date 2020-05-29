@@ -2,11 +2,9 @@
 #include "Arduino.h"
 #include <SPI.h>
 
+
 using namespace ADS1246COMMANDS;
 
-ADS1246::ADS1246()
-{
-}
 
 void ADS1246::toJson(JsonObject inputJsonObject)
 {
@@ -14,7 +12,10 @@ void ADS1246::toJson(JsonObject inputJsonObject)
   if (config.SSENSOR)
   {
     inputJsonObject["STATUS"] = "Untested";
-    inputJsonObject["offset"] = offset;
+    offset.toJson(inputJsonObject);
+    corrected_gain.toJson(inputJsonObject);
+    //inputJsonObject["offset"] = offset;
+    inputJsonObject["SPS_options"] = SPS;
     inputJsonObject["gain"] = gain;
     inputJsonObject["SPS"] = SPS[currentSPS];
     inputJsonObject["sensitivity"] = sensitivity;
@@ -22,15 +23,17 @@ void ADS1246::toJson(JsonObject inputJsonObject)
   }
 }
 
-void ADS1246::jsonConfig(JsonObject inputJsonObject)
+void ADS1246::fromJson(JsonObject inputJsonObject)
 {
-  if (inputJsonObject.containsKey("offset"))
+  if (inputJsonObject.containsKey(offset.name))
   {
-    offset = inputJsonObject["offset"].as<double>();
+    offset.fromJson(inputJsonObject[offset.name].as<JsonObject>());
+    //offset = inputJsonObject["offset"].as<double>();
   }
-  if (inputJsonObject.containsKey("gain"))
+  if (inputJsonObject.containsKey(corrected_gain.name))
   {
-    corrected_gain = inputJsonObject["gain"].as<double>();
+    corrected_gain.fromJson(inputJsonObject[corrected_gain.name].as<JsonObject>());
+    //corrected_gain = inputJsonObject["gain"].as<double>();
   }
   if (inputJsonObject.containsKey("SPS"))
   {
@@ -64,6 +67,9 @@ void ADS1246::begin(int inputCsPin, int inputStartPin, int inputResetPin)
   gain = GAIN128;
   fullScale = voltage / gain;
   lsb = ((2 * vref) / gain) / pow(2, 24);
+
+  corrected_gain.setup("corrected_gain", &_corrected_gain, 1, 0, 10, 0.1);
+  offset.setup("offset", &_offset, 0, -5, 5, 0.001);
 }
 
 void ADS1246::startTrans()
@@ -238,7 +244,7 @@ double ADS1246::readADC()
 double ADS1246::getConvertedOutput()
 {
   double temp = readADC();
-  return temp * sensitivity * corrected_gain + offset;
+  return temp * sensitivity * (*corrected_gain.value) + (*offset.value);
 }
 
 signed long ADS1246::ConvertTwosComplementByteToInteger(unsigned long rawValue)
