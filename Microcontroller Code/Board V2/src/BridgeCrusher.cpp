@@ -1,7 +1,6 @@
 #include "BridgeCrusherPins.h"
 #include "ProgramUtilities.h"
 
-
 #include "StopStartConditions.h"
 #include "RotaryEncoderJoel.h"
 
@@ -19,16 +18,12 @@
 #include <LiquidCrystal_PCF8574.h>
 #include <Wire.h>
 
-
 #include "UserInterface.h"
 #include "Motor_Testing.h"
 #include "Arduino.h"
 #include <SPI.h>
 
 #include "ChangeableSettings.h"
-
-
-
 
 void setup();
 void loop();
@@ -62,7 +57,6 @@ void polling_exit();
 void updateRunScreen();
 
 void mySerialEvent();
-
 
 /*
 NO_Switch encoderSw(Enc_SW_NO, String("Encoder Switch"));
@@ -128,7 +122,7 @@ State polling_state(&polling_enter, &polling_loop, &polling_exit);
 //State settings_screen(&singleSetting_entry,&singleSetting_loop, &singleSetting_exit);
 //State motor_testing_screen(&motor_testing_screen_enter, &motor_testing_screen_loop, &motor_testing_screen_exit);
 RunScreen runScreenObject;
-State newScreen(NULL, &updateRunScreen , NULL);
+State newScreen(NULL, &updateRunScreen, NULL);
 
 //Fsm fsm(&unloaded);
 Fsm screen(&newScreen);
@@ -150,52 +144,33 @@ int displayRefreshRate = 1000 / 3; // this is in ms. 3Hz
 int RUN_SCREEN = 1;
 int SETTINGS_SCREEN = 2;
 
-LCD lcd = *LCD::instance();
-Reporting config = *Reporting::instance();
-Sensors io = *Sensors::instance();
-Userinterface UI = *Userinterface::instance();
+LCD lcd;
+Reporting config;
+Sensors io;
+Userinterface UI;
+
+// Allocating and initializing the static data memebers
+// TODO: Move these to their own header files
+LCD *LCD::s_instance = 0;
+Reporting *Reporting::s_instance = 0;
+Sensors *Sensors::s_instance = 0;
+Userinterface *Userinterface::s_instance = 0;
+Force *Force::s_instance = 0;
+Distance *Distance::s_instance =0;
+Switches *Switches::s_instance = 0;
 
 
 #define TESTING
 
-void setup() {
-  SensorBase sd;
-  SingleInstance<LCD> a1;
-  SingleInstance<Reporting> a2;
-  SingleInstance<RotaryEncoderJoel> a3;
-  SingleInstance<Userinterface> a4;
-  SingleInstance<Sensors> a5;
+void setup()
+{
 
-  Reporting config1;
-  RotaryEncoderJoel enc1;
-  Userinterface UI1;
-  Sensors io1;
-  LCD lcd1;
-  
   // Start comms on usb
   Serial.begin(57600);
-  Serial.setTimeout(200);
+  //Serial.setTimeout(200);
 
-  // setup the reporting instance  
-  config.begin();
-
-  // setup the LCD instance
-  lcd.begin();
-  lcd.startup();
-
-  // setup the Switches instance
-  // one of the sensors has SPI in it so make sure to start it first!
-  SPI.begin();
-  io.begin();
-
-  // setup the UI instance  
-  UI.begin();
-
-  
   EncoderClick = false;
   EncoderValue = 0;
-
-
   // setup input and output of each pin
   pinMode(Enc_A, INPUT);
   pinMode(Enc_B, INPUT);
@@ -212,8 +187,6 @@ void setup() {
   pinMode(Dist_VAL, INPUT);
   pinMode(Mtr_CS, INPUT); // pin conflict
 
-
-
   //attachInterrupt(pin, ISR, mode);
   attachInterrupt(Enc_A, encoder_ISR, CHANGE);
   attachInterrupt(Enc_B, encoder_ISR, CHANGE);
@@ -227,7 +200,6 @@ void setup() {
   attachInterrupt(Mtr_PWM, motor_ISR, RISING);
   //analogReadResolution(10);
   analogReadResolution(12);
-
 
   // setup the filters
   // you can get the calculated values from here https://www.micromodeler.com/dsp/
@@ -267,15 +239,38 @@ void setup() {
 
   //initialSettingsSetup();
 
+
+  lcd = *LCD::instance();
+  config = *Reporting::instance();
+  io = *Sensors::instance();
+  UI = *Userinterface::instance();
+   // setup the reporting instance
+  config.begin();
+
+
+  // setup the Switches instance
+  // one of the sensors has SPI in it so make sure to start it first!
+  SPI.begin();
+  io.begin();
+
+  // setup the LCD instance
+  lcd.begin();
+  lcd.startup();
+
+  // setup the UI instance
+  UI.begin();
+  runScreenObject.begin();
+
+  
 }
 
-void loop() {
+void loop()
+{
   screen.run_machine();
   polling.run_machine();
   motor.run_machine();
   mySerialEvent();
 }
-
 
 /*
 bool readMax() {
@@ -301,17 +296,17 @@ double readMotorCurrent() {
 }
 */
 
-
-void polling_enter(){}
-void polling_exit(){}
+void polling_enter() {}
+void polling_exit() {}
 void polling_loop()
 {
   io.poll();
 
-  if (((millis() - debugTime) > 100 || io.force.sensor.newData)) {
-  //if (((millis() - debugTime) > 100)) {
+  //if (((millis() - debugTime) > 100 || io.force.sensor.newData))
+  //{
+    if (((millis() - debugTime) > 100)) {
     debugTime = millis();
-    //StaticJsonDocument<500> doc;
+    //StaticJsonDocument<500> doc;s
     DynamicJsonDocument doc(1000);
     config = *Reporting::instance();
 
@@ -400,52 +395,51 @@ void polling_loop()
   }
 }
 
-
 // unloaded
-void unloaded_enter() {
-
+void unloaded_enter()
+{
 }
-void unloaded_loop() {
-
+void unloaded_loop()
+{
 }
-void unloaded_exit() {
-
+void unloaded_exit()
+{
 }
 // testing
-void motoring_enter() {
+void motoring_enter()
+{
   //jack.update();
-  
 }
-void motoring_loop() {
+void motoring_loop()
+{
   // this is used for testing the motor
   //jack.motor->getCurrent();
   //jack.Input = jack.motor->lastCurrent*1000;
   //jack.update();
   //jack.motor->setSpeed(jack.Output);
-  
 }
-void motoring_exit() {
-
+void motoring_exit()
+{
 }
 // homing
-void homing_enter() {
-
+void homing_enter()
+{
 }
-void homing_loop() {
-
+void homing_loop()
+{
 }
-void homing_exit() {
-
+void homing_exit()
+{
 }
 // calibrating
-void calibrating_enter() {
-
+void calibrating_enter()
+{
 }
-void calibrating_loop() {
-
+void calibrating_loop()
+{
 }
-void calibrating_exit() {
-
+void calibrating_exit()
+{
 }
 
 void updateRunScreen()
@@ -455,16 +449,16 @@ void updateRunScreen()
 
 void mySerialEvent()
 {
-  if(Serial.available()<10)
+  if (Serial.available() < 10)
   {
     return;
   }
-  if(Serial.available()>10)
+  if (Serial.available() > 10)
   {
     StaticJsonDocument<200> sendBack[2];
     int amountToSendBack = -1;
-    
-    while(Serial.available()>10)
+
+    while (Serial.available() > 10)
     {
       amountToSendBack++;
       //byte buffer[512];
@@ -472,49 +466,47 @@ void mySerialEvent()
       //String inputMessage = String((char *)buffer);
       //String inputMessage = Serial.readStringUntil('\n');
       //ReadLoggingStream loggingStream(Serial, Serial);
-      
 
-      StaticJsonDocument<200> response ; //= sendBack[amountToSendBack];
+      StaticJsonDocument<200> response; //= sendBack[amountToSendBack];
       StaticJsonDocument<500> doc;
       DeserializationError err = deserializeJson(doc, Serial);
-      switch (err.code()) {
-          case DeserializationError::Ok:
-              response["Sucess"] = true;
-              if (doc.containsKey(config.name))
-              {
-                config.fromJson(doc[config.name].as<JsonObject>());
-              }
-              if (doc.containsKey(io.name))
-              {
-                io.fromJson(doc[io.name].as<JsonObject>()); 
-              }
-              if (doc.containsKey(UI.name))
-              {
-                UI.fromJson(doc[UI.name].as<JsonObject>());
-              }
-              break;
-          case DeserializationError::InvalidInput:
-              response["Sucess"] = false;
-              response["Reason"] = "Invalid Input";
-              break;
-          case DeserializationError::NoMemory:
-              response["Sucess"] = false;
-              response["Reason"] = "NoMemory";
-              break;
-          default:
-              response["Sucess"] = false;
-              response["Reason"] = "Deserialization failed";
-              break;
+      switch (err.code())
+      {
+      case DeserializationError::Ok:
+        response["Sucess"] = true;
+        if (doc.containsKey(config.name))
+        {
+          config.fromJson(doc[config.name].as<JsonObject>());
+        }
+        if (doc.containsKey(io.name))
+        {
+          io.fromJson(doc[io.name].as<JsonObject>());
+        }
+        if (doc.containsKey(UI.name))
+        {
+          UI.fromJson(doc[UI.name].as<JsonObject>());
+        }
+        break;
+      case DeserializationError::InvalidInput:
+        response["Sucess"] = false;
+        response["Reason"] = "Invalid Input";
+        break;
+      case DeserializationError::NoMemory:
+        response["Sucess"] = false;
+        response["Reason"] = "NoMemory";
+        break;
+      default:
+        response["Sucess"] = false;
+        response["Reason"] = "Deserialization failed";
+        break;
       };
-    
+
       sendBack[amountToSendBack] = response;
-      
     };
-    for(int i = 0; i<=amountToSendBack ;i++)
+    for (int i = 0; i <= amountToSendBack; i++)
     {
       serializeJson(sendBack[i], Serial);
       Serial.print('\n');
     }
-
   }
 }

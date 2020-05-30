@@ -8,9 +8,20 @@
 #include "JsonInterface.h"
 
 
-class LCD: public JsonInterface, public SingleInstance<LCD>
+class LCD: public JsonInterface
 {
     public:
+        static LCD *s_instance;
+
+        static LCD* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new LCD();
+            }
+            return s_instance;
+        };
+
         int address;
         int rows;
         int columns;

@@ -8,19 +8,16 @@ using namespace ADS1246COMMANDS;
 
 void ADS1246::toJson(JsonObject inputJsonObject)
 {
-  Reporting config = *Reporting::instance();
-  if (config.SSENSOR)
-  {
-    inputJsonObject["STATUS"] = "Untested";
-    offset.toJson(inputJsonObject);
-    corrected_gain.toJson(inputJsonObject);
+    JsonObject adsJson = inputJsonObject.createNestedObject(name);
+    adsJson["STATUS"] = "Untested";
+    offset.toJson(adsJson);
+    corrected_gain.toJson(adsJson);
     //inputJsonObject["offset"] = offset;
-    inputJsonObject["SPS_options"] = SPS;
-    inputJsonObject["gain"] = gain;
-    inputJsonObject["SPS"] = SPS[currentSPS];
-    inputJsonObject["sensitivity"] = sensitivity;
-    inputJsonObject["KG"] = getConvertedOutput();
-  }
+    adsJson["SPS_options"] = SPS;
+    adsJson["gain"] = gain;
+    adsJson["SPS"] = SPS[currentSPS];
+    adsJson["sensitivity"] = sensitivity;
+    adsJson["KG"] = getConvertedOutput();
 }
 
 void ADS1246::fromJson(JsonObject inputJsonObject)

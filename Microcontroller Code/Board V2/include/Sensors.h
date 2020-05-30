@@ -10,7 +10,7 @@
 class SensorBase : public JsonInterface
 {
 public:
-    SensorBase();
+    SensorBase(){};
     SensorBase(String i_name)
     {
         name = i_name;
@@ -119,9 +119,19 @@ protected:
     SingleSwitch::Type _type;
 };
 
-class Distance : public HardwareSensor, public AnalogInput, public SingleInstance<Distance>
+class Distance : public HardwareSensor, public AnalogInput
 {
 public:
+    static Distance *s_instance;
+
+        static Distance* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new Distance();
+            }
+            return s_instance;
+        };
     // distance in mm
     double distance;
     Distance()
@@ -167,10 +177,21 @@ protected:
     };
 };
 
-class Force : public AnalogInput, public SingleInstance<Force>
+class Force : public AnalogInput
 {
 
 public:
+    static Force *s_instance;
+
+        static Force* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new Force();
+            }
+            return s_instance;
+        };
+
     int maxPollRate;
     bool isReady;
     ADS1246 sensor;
@@ -222,9 +243,20 @@ protected:
     };
 };
 
-class Switches : public JsonInterface, public SingleInstance<Switches>
+class Switches : public JsonInterface
 {
 public:
+static Switches *s_instance;
+
+        static Switches* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new Switches();
+            }
+            return s_instance;
+        };
+    
     Switches()
     {
         name = String("Switches");
@@ -295,10 +327,22 @@ public:
     };
 };
 
-class Sensors : public JsonInterface, public SingleInstance<Sensors>
+class Sensors : public JsonInterface
 {
 
 public:
+
+    static Sensors *s_instance;
+
+        static Sensors* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new Sensors();
+            }
+            return s_instance;
+        };
+
     Sensors()
     {
         name = "Sensors";

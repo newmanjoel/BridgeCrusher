@@ -24,23 +24,5 @@ double polynomial(T7 inputValue, double order0=0, double order1=0, double order2
     pow(inputValue,2)*order2+inputValue*order1+order0;
 };
 
-template <class Z>
-class SingleInstance
-{
-    public:
-        SingleInstance(){};
-        static Z *s_instance;
-
-        static Z* instance()
-        {
-            if(s_instance == __null)
-            {
-                s_instance = new Z();
-            }
-            return s_instance;
-        };
-
-};
-
 
 #endif

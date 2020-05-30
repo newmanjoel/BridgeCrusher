@@ -9,9 +9,19 @@
 #include "JsonInterface.h"
 
 
-class Userinterface: public JsonInterface, public SingleInstance<Userinterface>
+class Userinterface: public JsonInterface
 {
     public:
+        static Userinterface *s_instance;
+
+        static Userinterface* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new Userinterface();
+            }
+            return s_instance;
+        };
         int switchLength;
         LCD lcd;
 

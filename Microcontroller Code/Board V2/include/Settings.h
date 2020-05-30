@@ -5,10 +5,20 @@
 #include "ProgramUtilities.h"
 #include "JsonInterface.h"
 
-class Reporting: public JsonInterface, public SingleInstance<Reporting>
+class Reporting: public JsonInterface
 {
     
     public:
+        static Reporting *s_instance;
+
+        static Reporting* instance()
+        {
+            if(s_instance == __null)
+            {
+                s_instance = new Reporting();
+            }
+            return s_instance;
+        };
         Reporting();
         String toString();
         bool FORCE;
