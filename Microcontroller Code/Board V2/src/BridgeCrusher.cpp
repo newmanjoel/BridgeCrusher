@@ -24,6 +24,7 @@
 #include <SPI.h>
 
 #include "ChangeableSettings.h"
+#include "HardwareConfiguration.h"
 
 void setup();
 void loop();
