@@ -166,6 +166,8 @@ Switches *Switches::s_instance = 0;
 void setup()
 {
 
+  HardwareConfig HAL;
+  HAL.setup();
   // Start comms on usb
   Serial.begin(57600);
   //Serial.setTimeout(200);

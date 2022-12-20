@@ -22,9 +22,11 @@ class RJ45
     
     // ----- Constructor -----
     RJ45();
+    RJ45(String i_JackLabel);
 
     // starting points
     void setup(String i_JackLabel);
+    void setPins(Pin* i_Pin1, Pin* i_Pin2, Pin* i_Pin3, Pin* i_Pin4, Pin* i_Pin5, Pin* i_Pin6, Pin* i_Pin7, Pin* i_Pin8);
 
   private:
     

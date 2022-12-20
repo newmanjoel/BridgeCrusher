@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\Desktop\\Database"
+		},
+		{
+			"name": "Board V2",
+			"path": "Microcontroller Code\\Board V2"
+		},
+		{
+			"name": "Board V3",
+			"path": "Microcontroller Code\\Board V3"
+		}
+	],
+	"settings": {}
+}
